@@ -8,6 +8,11 @@ shutil.rmtree(dst, ignore_errors=True)
 shutil.copytree(os.path.join(src, "_next"), os.path.join(dst, "assets"))
 s = open(os.path.join(src, "index.html"), encoding="utf-8").read().replace("_next/", "assets/")
 s = re.sub(r'<link rel="icon"[^>]*>', "", s)
+# Files from public/ (e.g. demo videos) sit next to index.html, so their links become relative.
+for name in os.listdir("public") if os.path.isdir("public") else []:
+    if os.path.isdir(os.path.join(src, name)):
+        shutil.copytree(os.path.join(src, name), os.path.join(dst, name))
+        s = s.replace(f'"/{name}/', f'"{name}/').replace(f'\\"/{name}/', f'\\"{name}/')
 open(os.path.join(dst, "index.html"), "w", encoding="utf-8").write(s)
 for root, _, files in os.walk(os.path.join(dst, "assets")):
     for f in files:

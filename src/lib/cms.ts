@@ -29,7 +29,7 @@ export type Project = {
   featured: boolean;
   services: string[];
   team: string;
-  teamMembers: { name: string; avatar: Media; href?: string }[];
+  teamMembers: Person[];
   credit: string;
   device: Device;
   cover: Cover;
@@ -38,7 +38,38 @@ export type Project = {
   sections: { heading: string; body: string; gallery: GalleryImage[] }[];
 };
 export type Device = "phone" | "tablet" | "laptop" | "none";
-export type GalleryImage = { image: Media; cover: Cover; caption: string; width: "full" | "half" };
+export type Person = { name: string; role: string; bio: string; href?: string; avatar: Media; demo: boolean };
+export type GalleryImage = {
+  media: Media;
+  embed?: string;
+  cover: Cover;
+  caption: string;
+  width: "full" | "twoThirds" | "half" | "third" | "quarter";
+  aspect: string;
+  fit: "cover" | "contain";
+  background: "none" | "dark" | "light";
+  frame: "none" | "browser" | "phone";
+  likes: number;
+};
+
+const person = (m: Record<string, unknown>): Person => ({
+  name: str(m.name),
+  role: str(m.role),
+  bio: str(m.bio),
+  href: str(m.href) || undefined,
+  avatar: media(m.avatar as MediaDoc),
+  demo: !!m.demo,
+});
+
+// A linked image or video: YouTube and Vimeo become embeds, video files play inline.
+const linked = (url: string): { media: Media; embed?: string } => {
+  const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{6,})/);
+  if (yt) return { media: null, embed: `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&loop=1&playlist=${yt[1]}&controls=0` };
+  const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeo) return { media: null, embed: `https://player.vimeo.com/video/${vimeo[1]}?autoplay=1&muted=1&loop=1&background=1` };
+  return { media: { url, alt: "", video: /\.(mp4|webm|mov|m4v)(\?|$)/i.test(url) } };
+};
+const widths = ["full", "twoThirds", "half", "third", "quarter"] as const;
 
 export const getSite = cache(async () => {
   const s = (await (await payload()).findGlobal({ slug: "site", depth: 1 })) as unknown as Record<string, never>;
@@ -73,23 +104,30 @@ export const getProjects = cache(async (): Promise<Project[]> =>
     featured: !!d.featured,
     services: ((d.services as { name: string }[]) ?? []).map((s) => s.name),
     team: (d.team as string) ?? "",
-    teamMembers: ((d.teamMembers as Record<string, unknown>[]) ?? [])
-      .filter((m) => m && typeof m === "object")
-      .map((m) => ({ name: str(m.name), avatar: media(m.avatar as MediaDoc), href: str(m.href) || undefined })),
+    teamMembers: ((d.teamMembers as Record<string, unknown>[]) ?? []).filter((m) => m && typeof m === "object").map(person),
     credit: (d.credit as string) ?? "",
     device: ((d.device as Device) ?? "phone") as Device,
     cover: ((d.cover as Cover) ?? "graph") as Cover,
     image: media(d.image as MediaDoc),
     intro: (d.intro as string) ?? "",
     sections: ((d.sections as Record<string, unknown>[]) ?? []).map((s) => ({
-      heading: s.heading as string,
-      body: s.body as string,
-      gallery: ((s.gallery as Record<string, unknown>[]) ?? []).map((g) => ({
-        image: media(g.image as MediaDoc),
-        cover: ((g.cover as Cover) ?? "graph") as Cover,
-        caption: str(g.caption),
-        width: g.width === "half" ? "half" : "full",
-      })),
+      heading: str(s.heading),
+      body: str(s.body),
+      gallery: ((s.gallery as Record<string, unknown>[]) ?? []).map((g): GalleryImage => {
+        const source = str(g.source) || "upload";
+        const file = source === "url" && str(g.url) ? linked(str(g.url)) : { media: source === "upload" ? media(g.image as MediaDoc) : null };
+        return {
+          ...file,
+          cover: ((g.cover as Cover) ?? "graph") as Cover,
+          caption: str(g.caption),
+          width: widths.find((w) => w === g.width) ?? "full",
+          aspect: str(g.aspect) || "16/10",
+          fit: g.fit === "contain" ? "contain" : "cover",
+          background: g.background === "dark" || g.background === "light" ? g.background : "none",
+          frame: g.frame === "browser" || g.frame === "phone" ? g.frame : "none",
+          likes: typeof g.likes === "number" ? g.likes : 0,
+        };
+      }),
     })),
   })),
 );
@@ -101,9 +139,7 @@ export const getPhotos = cache(async () => pick(await all("photos"), (d) => ({ i
 export const getClients = cache(async () =>
   pick(await all("clients"), (d) => ({ name: str(d.name), note: str(d.note), tags: (d.tags as string[]) ?? [], href: str(d.href) || undefined })),
 );
-export const getPeople = cache(async () =>
-  pick(await all("people"), (d) => ({ name: str(d.name), role: str(d.role), tags: (d.tags as string[]) ?? [], href: str(d.href) || undefined, avatar: media(d.avatar as MediaDoc) })),
-);
+export const getPeople = cache(async () => pick(await all("people"), (d) => ({ ...person(d), tags: (d.tags as string[]) ?? [] })));
 export const getPapers = cache(async () =>
   pick(await all("papers"), (d) => ({ title: str(d.title), venue: str(d.venue), year: str(d.year), status: str(d.status), href: str(d.href) || undefined, image: media(d.image as MediaDoc) })),
 );

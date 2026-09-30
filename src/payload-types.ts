@@ -154,6 +154,9 @@ export interface Project {
   slug: string;
   subtitle: string;
   code?: string | null;
+  /**
+   * e.g. 2025 or 2024 - 2026
+   */
   year?: string | null;
   team?: string | null;
   /**
@@ -178,7 +181,7 @@ export interface Project {
    */
   credit?: string | null;
   /**
-   * Shown as avatars next to Team.
+   * Each person is a persona from People: shown as an avatar with their name, role and link on hover.
    */
   teamMembers?: (number | Person)[] | null;
   services?:
@@ -187,22 +190,50 @@ export interface Project {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Blocks of text and media, top to bottom. Leave the heading and text empty for a media-only block, e.g. a hero video.
+   */
   sections?:
     | {
-        heading: string;
-        body: string;
+        heading?: string | null;
+        body?: string | null;
         /**
-         * Images for this section. Two half-width images sit side by side.
+         * Laid out on a 12-column grid: items fill a row until their widths add up to full.
          */
         gallery?:
           | {
+              source?: ('upload' | 'url' | 'placeholder') | null;
+              width?: ('full' | 'twoThirds' | 'half' | 'third' | 'quarter') | null;
+              /**
+               * Shape of the frame.
+               */
+              aspect?: ('21/9' | '2/1' | '16/9' | '16/10' | '4/3' | '1/1' | '4/5' | '3/4' | '9/16') | null;
+              /**
+               * Image or video file.
+               */
               image?: (number | null) | Media;
               /**
-               * Animated placeholder when there is no image.
+               * Image or video address. .mp4/.webm play as video; YouTube and Vimeo links are embedded.
+               */
+              url?: string | null;
+              /**
+               * Animated placeholder used when there is no file or link.
                */
               cover?: ('voice' | 'grid' | 'doc' | 'stream' | 'market' | 'graph' | 'ledger' | 'fusion') | null;
+              fit?: ('cover' | 'contain') | null;
+              /**
+               * Panel behind the media.
+               */
+              background?: ('none' | 'dark' | 'light') | null;
+              /**
+               * Optional device chrome.
+               */
+              frame?: ('none' | 'browser' | 'phone') | null;
               caption?: string | null;
-              width?: ('full' | 'half') | null;
+              /**
+               * Starting count on the heart button shown on hover. 0 hides the count.
+               */
+              likes?: number | null;
               id?: string | null;
             }[]
           | null;
@@ -244,11 +275,25 @@ export interface Person {
   name: string;
   role?: string | null;
   /**
+   * One or two lines, shown on the persona card when someone hovers the avatar on a project.
+   */
+  bio?: string | null;
+  /**
    * Filters on the People page are built from these.
    */
   tags?: string[] | null;
+  /**
+   * LinkedIn or personal site. The avatar links here.
+   */
   href?: string | null;
+  /**
+   * Square photo. Without one, a coloured monogram is drawn.
+   */
   avatar?: (number | null) | Media;
+  /**
+   * Demo persona written as sample content. Replace or delete before launch.
+   */
+  demo?: boolean | null;
   /**
    * Lower numbers show first.
    */
@@ -522,10 +567,17 @@ export interface ProjectsSelect<T extends boolean = true> {
         gallery?:
           | T
           | {
-              image?: T;
-              cover?: T;
-              caption?: T;
+              source?: T;
               width?: T;
+              aspect?: T;
+              image?: T;
+              url?: T;
+              cover?: T;
+              fit?: T;
+              background?: T;
+              frame?: T;
+              caption?: T;
+              likes?: T;
               id?: T;
             };
         id?: T;
@@ -577,9 +629,11 @@ export interface ClientsSelect<T extends boolean = true> {
 export interface PeopleSelect<T extends boolean = true> {
   name?: T;
   role?: T;
+  bio?: T;
   tags?: T;
   href?: T;
   avatar?: T;
+  demo?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -775,6 +829,7 @@ export interface About {
  */
 export interface Page {
   id: number;
+  contentVersion?: number | null;
   work: {
     title: string;
     intro?: string | null;
@@ -874,6 +929,7 @@ export interface AboutSelect<T extends boolean = true> {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
+  contentVersion?: T;
   work?:
     | T
     | {

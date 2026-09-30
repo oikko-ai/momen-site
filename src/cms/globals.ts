@@ -70,6 +70,7 @@ export const Pages: GlobalConfig = {
   hooks: { afterChange: [refreshSite] },
   admin: { group: "Pages" },
   fields: [
+    { name: "contentVersion", type: "number", admin: { hidden: true } },
     {
       type: "tabs",
       tabs: [

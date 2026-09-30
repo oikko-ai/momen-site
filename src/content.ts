@@ -46,9 +46,21 @@ export type Project = {
   device?: "phone" | "tablet" | "laptop" | "none";
   credit?: string;
   intro: string;
-  sections: { heading: string; body: string; cover: Cover; gallery?: GalleryItem[] }[];
+  sections: { heading?: string; body?: string; cover: Cover; gallery?: GalleryItem[] }[];
+  people?: string[];
 };
-export type GalleryItem = { cover: Cover; caption?: string; width: "full" | "half" };
+export type GalleryItem = {
+  cover: Cover;
+  caption?: string;
+  width: "full" | "twoThirds" | "half" | "third" | "quarter";
+  source?: "upload" | "url" | "placeholder";
+  url?: string;
+  aspect?: string;
+  fit?: "cover" | "contain";
+  background?: "none" | "dark" | "light";
+  frame?: "none" | "browser" | "phone";
+  likes?: number;
+};
 
 export const projects: Project[] = [
   {
@@ -64,6 +76,7 @@ export const projects: Project[] = [
     intro:
       "A meeting assistant that joins the call, listens in Bengali and English, and hands back a summary, tasks and CRM updates before everyone has left the room.",
     device: "laptop",
+    people: ["Abdul Momen", "Nadia Karim", "Rafi Hasan"],
     credit: "Built with the GTR product team. Screens shown here are placeholders until the real ones are uploaded in the CMS.",
     sections: [
       {
@@ -138,13 +151,61 @@ export const projects: Project[] = [
     subtitle: "Helping local manufacturers find buyers",
     year: "2026",
     featured: true,
-    services: ["Oikko AI", "Product", "Marketplace"],
+    services: ["Product design", "AI engineering", "Strategy"],
     team: "Oikko AI",
     cover: "market",
+    device: "phone",
+    people: ["Abdul Momen", "Shuvo Saha", "Apon Roy", "Arnob Dey", "Tithi Biswas"],
     intro:
-      "A B2B marketplace that connects buyers with manufacturers across Bangladesh, starting with packaging, plastics, light engineering and garment accessories.",
+      "A B2B marketplace that connects buyers with manufacturers across Bangladesh, starting with packaging, plastics, light engineering and garment accessories. Instead of chasing suppliers through phone calls and word of mouth, a buyer describes what they need and gets a short list of factories that can actually make it.",
+    credit: "Demo content: the text and media on this page are samples to show the layout. Replace them in the CMS.",
     sections: [
-      { heading: "Two sides, one place", body: "Buyers search by category; manufacturers show what they can make and at what scale.", cover: "market" },
+      {
+        cover: "market",
+        gallery: [{ cover: "market", width: "full", aspect: "16/9", source: "url", url: "/demo/marketplace-hero.mp4", likes: 24 }],
+      },
+      {
+        heading: "Two sides, one place",
+        body: "Buyers search by what they need made, not by company name. Manufacturers describe their machines, materials and minimum orders once, and the marketplace does the matching. Both sides see the same facts, so the first conversation starts with a quote instead of a cold call.",
+        cover: "market",
+        gallery: [
+          { cover: "grid", width: "full", aspect: "16/10", fit: "contain", background: "dark", frame: "browser", caption: "Search by product, material or process.", likes: 12 },
+          { cover: "doc", width: "third", aspect: "1/1", background: "dark" },
+          { cover: "ledger", width: "twoThirds", aspect: "2/1", background: "dark", caption: "A request turns into a structured brief both sides can read." },
+        ],
+      },
+      {
+        heading: "Matching that explains itself",
+        body: "An AI model reads each request and each factory profile, then ranks suppliers by fit. Every match comes with its reasons, like capacity, past orders and distance, so a buyer can trust the list and a manufacturer can see why they were picked.",
+        cover: "graph",
+        gallery: [
+          { cover: "graph", width: "full", aspect: "4/3", source: "url", url: "/demo/marketplace-matching.mp4", caption: "Requests and suppliers finding each other over a week of demo traffic.", likes: 18 },
+          { cover: "stream", width: "third", aspect: "4/5" },
+          { cover: "fusion", width: "third", aspect: "4/5", likes: 7 },
+          { cover: "voice", width: "third", aspect: "4/5" },
+        ],
+      },
+      {
+        heading: "A factory floor in your pocket",
+        body: "Most manufacturers run their business from a phone. The supplier app keeps things simple: new requests, quotes to send and orders in progress, with Bengali and English side by side.",
+        cover: "grid",
+        gallery: [
+          { cover: "grid", width: "third", aspect: "9/16", frame: "phone", background: "dark", caption: "New requests" },
+          { cover: "doc", width: "third", aspect: "9/16", frame: "phone", background: "dark", caption: "Sending a quote", likes: 10 },
+          { cover: "ledger", width: "third", aspect: "9/16", frame: "phone", background: "dark", caption: "Orders in progress" },
+        ],
+      },
+      {
+        heading: "Photography",
+        body: "Real factories, real people. The visual language uses workshop photography with warm light, so buyers see the hands and machines behind every listing. Photos here are placeholders until the shoot is done.",
+        cover: "fusion",
+        gallery: [
+          { cover: "market", width: "half", aspect: "4/3" },
+          { cover: "fusion", width: "half", aspect: "4/3", likes: 9 },
+          { cover: "doc", width: "half", aspect: "4/3" },
+          { cover: "stream", width: "half", aspect: "4/3" },
+        ],
+      },
     ],
   },
   {
@@ -247,11 +308,21 @@ export const clients: { name: string; note: string; tags: (typeof clientTags)[nu
 
 export const peopleTags = ["All", "Oikko AI", "Engineering", "Product"] as const;
 // PLACEHOLDER: add colleagues and collaborators; tags drive the filter.
-export const people: { name: string; role: string; tags: (typeof peopleTags)[number][]; href?: string }[] = [
+export const people: { name: string; role: string; bio?: string; tags: string[]; href?: string; demo?: boolean }[] = [
+  {
+    name: "Abdul Momen",
+    role: "Founder, AI engineer",
+    bio: "Builds the AI systems behind the product, from models to the plumbing that keeps them honest.",
+    tags: ["Oikko AI", "Engineering"],
+    href: "https://linkedin.com/in/abdulmomen01",
+  },
   { name: "Shuvo Saha", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Product"] },
   { name: "Apon Roy", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Engineering"] },
   { name: "Arnob Dey", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Engineering"] },
   { name: "Tithi Biswas", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Product"] },
+  // Demo personas: sample content for the NoteAI page. Replace with the real team in the CMS.
+  { name: "Nadia Karim", role: "Product designer (demo persona)", bio: "Sample persona. Shaped the meeting summary and the approval flow.", tags: ["Product"], demo: true },
+  { name: "Rafi Hasan", role: "Backend engineer (demo persona)", bio: "Sample persona. Built the recording bots and the speech pipeline.", tags: ["Engineering"], demo: true },
 ];
 
 export const homeAbout = {
