@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { clientTags } from "@/content";
 
 type Client = { name: string; note: string; tags: string[]; href?: string };
 import Chips from "@/components/Chips";
 
-export default function Clients({ clients }: { clients: Client[] }) {
+export default function Clients({ clients, tags }: { clients: Client[]; tags: string[] }) {
   const [tag, setTag] = useState<string>("All");
   const list = clients.filter((c) => tag === "All" || c.tags.includes(tag)).sort((a, b) => a.name.localeCompare(b.name));
   return (
     <>
-      <Chips tags={clientTags} value={tag} onChange={setTag} />
+      <Chips tags={tags} value={tag} onChange={setTag} />
       <ul className="mt-10">
         {list.map((c, i) => {
           const letter = c.name[0].toUpperCase();

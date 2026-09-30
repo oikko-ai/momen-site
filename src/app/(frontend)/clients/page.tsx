@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { getClients } from "@/lib/cms";
+import { getClients, getPages, tagsOf } from "@/lib/cms";
 import PageHead from "@/components/PageHead";
 import Clients from "./Clients";
 
-export const metadata: Metadata = { title: "Clients" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getPages()).clients.title };
+}
 
 export default async function Page() {
-  const items = await getClients();
+  const [items, pages] = await Promise.all([getClients(), getPages()]);
   return (
     <div className="mx-auto max-w-[1040px] px-5 md:px-7">
-      <PageHead title="Clients" />
-      <Clients clients={items} />
+      <PageHead title={pages.clients.title} intro={pages.clients.intro} />
+      <Clients clients={items} tags={tagsOf(items)} />
     </div>
   );
 }

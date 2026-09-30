@@ -106,10 +106,12 @@ export interface Config {
   globals: {
     site: Site;
     about: About;
+    pages: Page;
   };
   globalsSelect: {
     site: SiteSelect<false> | SiteSelect<true>;
     about: AboutSelect<false> | AboutSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
   };
   locale: null;
   widgets: {
@@ -158,12 +160,10 @@ export interface Project {
    * Show in the big carousel on the home page.
    */
   featured?: boolean | null;
-  services?:
-    | {
-        name: string;
-        id?: string | null;
-      }[]
-    | null;
+  /**
+   * Frame shown around the cover on the Work page. "none" shows the image edge to edge.
+   */
+  device?: ('phone' | 'tablet' | 'laptop' | 'none') | null;
   /**
    * Cover image or video. Leave empty to use the animated cover below.
    */
@@ -173,12 +173,39 @@ export interface Project {
    */
   cover?: ('voice' | 'grid' | 'doc' | 'stream' | 'market' | 'graph' | 'ledger' | 'fusion') | null;
   intro: string;
+  /**
+   * Optional italic note under the intro, e.g. who led the work.
+   */
+  credit?: string | null;
+  /**
+   * Shown as avatars next to Team.
+   */
+  teamMembers?: (number | Person)[] | null;
+  services?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
   sections?:
     | {
         heading: string;
         body: string;
-        image?: (number | null) | Media;
-        cover?: ('voice' | 'grid' | 'doc' | 'stream' | 'market' | 'graph' | 'ledger' | 'fusion') | null;
+        /**
+         * Images for this section. Two half-width images sit side by side.
+         */
+        gallery?:
+          | {
+              image?: (number | null) | Media;
+              /**
+               * Animated placeholder when there is no image.
+               */
+              cover?: ('voice' | 'grid' | 'doc' | 'stream' | 'market' | 'graph' | 'ledger' | 'fusion') | null;
+              caption?: string | null;
+              width?: ('full' | 'half') | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -207,6 +234,27 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "people".
+ */
+export interface Person {
+  id: number;
+  name: string;
+  role?: string | null;
+  /**
+   * Filters on the People page are built from these.
+   */
+  tags?: string[] | null;
+  href?: string | null;
+  avatar?: (number | null) | Media;
+  /**
+   * Lower numbers show first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -247,26 +295,11 @@ export interface Client {
   id: number;
   name: string;
   note?: string | null;
-  tags?: ('AI' | 'Enterprise' | 'Legal' | 'Commerce' | 'Marketplace')[] | null;
-  href?: string | null;
   /**
-   * Lower numbers show first.
+   * Filters on the Clients page are built from these.
    */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "people".
- */
-export interface Person {
-  id: number;
-  name: string;
-  role?: string | null;
-  tags?: ('Oikko AI' | 'Engineering' | 'Product')[] | null;
+  tags?: string[] | null;
   href?: string | null;
-  avatar?: (number | null) | Media;
   /**
    * Lower numbers show first.
    */
@@ -469,22 +502,32 @@ export interface ProjectsSelect<T extends boolean = true> {
   year?: T;
   team?: T;
   featured?: T;
+  device?: T;
+  image?: T;
+  cover?: T;
+  intro?: T;
+  credit?: T;
+  teamMembers?: T;
   services?:
     | T
     | {
         name?: T;
         id?: T;
       };
-  image?: T;
-  cover?: T;
-  intro?: T;
   sections?:
     | T
     | {
         heading?: T;
         body?: T;
-        image?: T;
-        cover?: T;
+        gallery?:
+          | T
+          | {
+              image?: T;
+              cover?: T;
+              caption?: T;
+              width?: T;
+              id?: T;
+            };
         id?: T;
       };
   order?: T;
@@ -728,6 +771,53 @@ export interface About {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  work: {
+    title: string;
+    intro?: string | null;
+    nextLabel?: string | null;
+  };
+  notes: {
+    title: string;
+    intro?: string | null;
+    /**
+     * Shown while there are no notes.
+     */
+    emptyText?: string | null;
+    signupTitle?: string | null;
+    signupText?: string | null;
+  };
+  photos: {
+    title: string;
+    intro?: string | null;
+  };
+  clients: {
+    title: string;
+    intro?: string | null;
+  };
+  people: {
+    title: string;
+    intro?: string | null;
+  };
+  colophon: {
+    title: string;
+    intro?: string | null;
+    rows?:
+      | {
+          label: string;
+          value: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site_select".
  */
 export interface SiteSelect<T extends boolean = true> {
@@ -774,6 +864,62 @@ export interface AboutSelect<T extends boolean = true> {
     | {
         text?: T;
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  work?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        nextLabel?: T;
+      };
+  notes?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        emptyText?: T;
+        signupTitle?: T;
+        signupText?: T;
+      };
+  photos?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+      };
+  clients?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+      };
+  people?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+      };
+  colophon?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        rows?:
+          | T
+          | {
+              label?: T;
+              value?: T;
+              id?: T;
+            };
       };
   updatedAt?: T;
   createdAt?: T;

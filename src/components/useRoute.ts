@@ -10,5 +10,6 @@ export function useRoute(pathname: string) {
     addEventListener("preview-route", on);
     return () => removeEventListener("preview-route", on);
   }, []);
-  return route ?? pathname;
+  // The preview is exported as one page rendered at "/", so start from there to match the server HTML.
+  return route ?? (process.env.NEXT_PUBLIC_PREVIEW ? "/" : pathname);
 }

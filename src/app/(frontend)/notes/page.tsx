@@ -1,24 +1,29 @@
 import type { Metadata } from "next";
-import { getNotes, getSite } from "@/lib/cms";
+import { getNotes, getPages, getSite } from "@/lib/cms";
 import Subscribe from "./Subscribe";
 
-export const metadata: Metadata = { title: "Notes" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getPages()).notes.title };
+}
 
 export default async function Notes() {
-  const [notes, site] = await Promise.all([getNotes(), getSite()]);
+  const [notes, site, pages] = await Promise.all([getNotes(), getSite(), getPages()]);
+  const [emptyFirst, ...emptyRest] = pages.notes.emptyText.split("\n");
   const linkedin = site.socials.find((s) => s.label.toLowerCase() === "linkedin")?.href;
   const years = [...new Set(notes.map((n) => n.year))].sort().reverse();
   return (
     <div className="mx-auto max-w-[1040px] px-5 md:px-7">
-      <h1 className="rise pb-12 pt-14 text-[44px] font-light tracking-[-0.03em] md:pt-20 md:text-[64px]">Notes</h1>
+      <h1 className="rise pb-12 pt-14 text-[44px] font-light tracking-[-0.03em] md:pt-20 md:text-[64px]">{pages.notes.title}</h1>
       <div className="grid gap-12 md:grid-cols-[1fr_340px] md:gap-16">
         <div>
           {years.length === 0 ? (
             <div className="grid grid-cols-[64px_1fr] gap-4 text-[16px]" data-inview>
               <span className="text-faint">2026</span>
               <div className="space-y-3">
-                <p>The first notes are on their way.</p>
-                <p className="text-soft">On shipping AI that people trust, research, and building a company in Dhaka.</p>
+                <p>{emptyFirst}</p>
+                {emptyRest.map((t) => (
+                  <p key={t} className="text-soft">{t}</p>
+                ))}
               </div>
             </div>
           ) : (
@@ -38,7 +43,7 @@ export default async function Notes() {
             ))
           )}
         </div>
-        <Subscribe email={site.email} linkedin={linkedin} />
+        <Subscribe email={site.email} linkedin={linkedin} title={pages.notes.signupTitle} text={pages.notes.signupText} />
       </div>
     </div>
   );

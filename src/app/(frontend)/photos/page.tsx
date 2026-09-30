@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { getPhotos } from "@/lib/cms";
+import { getPages, getPhotos } from "@/lib/cms";
 import Gallery from "./Gallery";
 
-export const metadata: Metadata = { title: "Photos" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getPages()).photos.title };
+}
 
 export default async function Photos() {
   const photos = await getPhotos();

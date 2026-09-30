@@ -43,9 +43,12 @@ export type Project = {
   services: string[];
   team: string;
   cover: Cover;
+  device?: "phone" | "tablet" | "laptop" | "none";
+  credit?: string;
   intro: string;
-  sections: { heading: string; body: string; cover: Cover }[];
+  sections: { heading: string; body: string; cover: Cover; gallery?: GalleryItem[] }[];
 };
+export type GalleryItem = { cover: Cover; caption?: string; width: "full" | "half" };
 
 export const projects: Project[] = [
   {
@@ -60,10 +63,38 @@ export const projects: Project[] = [
     cover: "voice",
     intro:
       "A meeting assistant that joins the call, listens in Bengali and English, and hands back a summary, tasks and CRM updates before everyone has left the room.",
+    device: "laptop",
+    credit: "Built with the GTR product team. Screens shown here are placeholders until the real ones are uploaded in the CMS.",
     sections: [
-      { heading: "Joining the call", body: "A bot joins Meet, Zoom or Teams and records each meeting on its own track, so nothing leaks between sessions.", cover: "voice" },
-      { heading: "Hearing Bengali properly", body: "Off-the-shelf speech models struggled with Bengali, so I tuned one on speech we recorded ourselves.", cover: "stream" },
-      { heading: "From transcript to action", body: "An agent reads the conversation and turns it into decisions, owners and CRM entries a person can approve.", cover: "ledger" },
+      {
+        heading: "Joining the call",
+        body: "A bot joins Meet, Zoom or Teams and records each meeting on its own track, so nothing leaks between sessions.",
+        cover: "voice",
+        gallery: [
+          { cover: "voice", width: "full", caption: "The assistant joins as a guest and shows everyone it is recording." },
+          { cover: "grid", width: "half", caption: "Each meeting gets its own isolated recorder." },
+          { cover: "stream", width: "half", caption: "Recordings land in storage the moment a call ends." },
+        ],
+      },
+      {
+        heading: "Hearing Bengali properly",
+        body: "Off-the-shelf speech models struggled with Bengali, so I tuned one on speech we recorded ourselves.",
+        cover: "stream",
+        gallery: [
+          { cover: "stream", width: "full", caption: "Transcripts switch between Bengali and English mid-sentence without losing the thread." },
+          { cover: "graph", width: "half", caption: "Word error rate before and after tuning." },
+          { cover: "doc", width: "half", caption: "Speaker labels a reviewer can correct in place." },
+        ],
+      },
+      {
+        heading: "From transcript to action",
+        body: "An agent reads the conversation and turns it into decisions, owners and CRM entries a person can approve.",
+        cover: "ledger",
+        gallery: [
+          { cover: "ledger", width: "full", caption: "Tasks and owners, ready to approve before they reach the CRM." },
+          { cover: "fusion", width: "full", caption: "The summary arrives while people are still saying goodbye." },
+        ],
+      },
     ],
   },
   {
@@ -241,4 +272,33 @@ export const aboutPage = {
     "With Oikko AI, four friends and I make software for businesses that usually get it last, starting with a marketplace for local manufacturers and legal tools that always show their sources.",
     "I work best with people who are honest about what they don't know yet and want to learn it quickly with real users. If that sounds like your team, I'd like to hear from you.",
   ],
+};
+
+// Titles and short texts for the list pages. Editable in the CMS under "Other pages".
+export const pages = {
+  work: { title: "Work", intro: "", nextLabel: "Next project" },
+  notes: {
+    title: "Notes",
+    intro: "",
+    emptyText: "The first notes are on their way.\nOn shipping AI that people trust, research, and building a company in Dhaka.",
+    signupTitle: "Get new notes by email",
+    signupText: "Occasional writing on AI engineering, research and founding.",
+  },
+  photos: { title: "Photos", intro: "" },
+  clients: { title: "Clients", intro: "" },
+  people: { title: "People", intro: "Good work is never solo. These are the people I build with, learn from and would happily work with again." },
+  colophon: {
+    title: "Colophon",
+    intro: "Built by hand, with thanks to the open-source community.",
+    rows: [
+      { label: "Design and words", value: "Abdul Momen" },
+      { label: "Framework", value: "Next.js" },
+      { label: "Content", value: "Payload CMS" },
+      { label: "Styling", value: "Tailwind CSS" },
+      { label: "Type", value: "Inter" },
+      { label: "Covers", value: "Drawn in code" },
+      { label: "Language", value: "TypeScript" },
+      { label: "Made in", value: "Dhaka" },
+    ],
+  },
 };

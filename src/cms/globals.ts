@@ -54,4 +54,50 @@ export const About: GlobalConfig = {
   fields: [{ name: "heading", type: "textarea", required: true }, paragraphs("body", "Text")],
 };
 
-export const globals = [Site, About];
+const pageText = (name: string, label: string, extra: GlobalConfig["fields"] = []) =>
+  ({
+    name,
+    label,
+    type: "group",
+    fields: [{ name: "title", type: "text", required: true }, { name: "intro", type: "textarea" }, ...extra],
+  }) as GlobalConfig["fields"][number];
+
+// Titles and intro text for every other page, so nothing on the site is hard-coded.
+export const Pages: GlobalConfig = {
+  slug: "pages",
+  label: "Other pages",
+  access: { read: () => true },
+  hooks: { afterChange: [refreshSite] },
+  admin: { group: "Pages" },
+  fields: [
+    {
+      type: "tabs",
+      tabs: [
+        { label: "Work", fields: [pageText("work", "Work page", [{ name: "nextLabel", type: "text", defaultValue: "Next project" }])] },
+        {
+          label: "Notes",
+          fields: [
+            pageText("notes", "Notes page", [
+              { name: "emptyText", type: "textarea", admin: { description: "Shown while there are no notes." } },
+              { name: "signupTitle", type: "text" },
+              { name: "signupText", type: "textarea" },
+            ]),
+          ],
+        },
+        { label: "Photos", fields: [pageText("photos", "Photos page")] },
+        { label: "Clients", fields: [pageText("clients", "Clients page")] },
+        { label: "People", fields: [pageText("people", "People page")] },
+        {
+          label: "Colophon",
+          fields: [
+            pageText("colophon", "Colophon page", [
+              { name: "rows", type: "array", fields: [{ name: "label", type: "text", required: true }, { name: "value", type: "text", required: true }] },
+            ]),
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+export const globals = [Site, About, Pages];

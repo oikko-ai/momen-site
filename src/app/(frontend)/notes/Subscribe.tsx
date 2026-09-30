@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 // No mailing service yet: signing up drafts an email to Momen with the address.
-export default function Subscribe({ email: to, linkedin }: { email: string; linkedin?: string }) {
+export default function Subscribe({ email: to, linkedin, title, text }: { email: string; linkedin?: string; title: string; text: string }) {
   const [email, setEmail] = useState("");
   return (
     <aside className="h-fit md:sticky md:top-8" data-inview>
@@ -14,8 +14,8 @@ export default function Subscribe({ email: to, linkedin }: { email: string; link
         }}
         className="rounded-xl border border-white/5 bg-card p-5"
       >
-        <p className="text-[16px]">Get new notes by email</p>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-soft">Occasional writing on AI engineering, research and founding.</p>
+        <p className="text-[16px]">{title}</p>
+        <p className="mt-1.5 text-[13px] leading-relaxed text-soft">{text}</p>
         <div className="mt-4 flex gap-2">
           <input
             type="email"

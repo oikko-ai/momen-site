@@ -64,3 +64,14 @@ body {
 @keyframes marquee { to { transform: translateX(-50%); } }
 .marquee { animation: marquee 60s linear infinite; }
 @media (prefers-reduced-motion: reduce) { .marquee { animation: none; } }
+
+/* Work cards: the device floats at an angle and settles a little on hover */
+.tilt { transform: perspective(1400px) rotateX(8deg) rotateY(-16deg) rotateZ(5deg); transition: transform 0.9s var(--ease); }
+.group:hover .tilt { transform: perspective(1400px) rotateX(4deg) rotateY(-8deg) rotateZ(2deg) translateY(-8px) scale(1.03); }
+.tilt-alt { transform: perspective(1400px) rotateX(8deg) rotateY(16deg) rotateZ(-5deg); }
+.group:hover .tilt-alt { transform: perspective(1400px) rotateX(4deg) rotateY(8deg) rotateZ(-2deg) translateY(-8px) scale(1.03); }
+
+/* Case study images ease in slightly larger than they settle */
+[data-inview] .settle { transform: scale(1.04); transition: transform 1.4s var(--ease); }
+[data-inview="true"] .settle { transform: none; }
+@media (prefers-reduced-motion: reduce) { .tilt, .tilt-alt, .group:hover .tilt, .group:hover .tilt-alt, [data-inview] .settle { transform: none; } }

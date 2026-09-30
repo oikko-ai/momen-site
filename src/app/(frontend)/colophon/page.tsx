@@ -1,30 +1,23 @@
 import type { Metadata } from "next";
+import { getPages } from "@/lib/cms";
 
-export const metadata: Metadata = { title: "Colophon" };
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getPages()).colophon.title };
+}
 
-const rows = [
-  ["Design and words", "Abdul Momen"],
-  ["Framework", "Next.js"],
-  ["Interface", "React"],
-  ["Styling", "Tailwind CSS"],
-  ["Type", "Inter"],
-  ["Covers", "Drawn in code"],
-  ["Language", "TypeScript"],
-  ["Made in", "Dhaka"],
-];
-
-export default function Colophon() {
+export default async function Colophon() {
+  const { colophon } = await getPages();
   return (
-    <div className="mx-auto max-w-[560px] px-5 pt-20 text-center">
-      <p className="rise text-[16px]">Built by hand, with thanks to the open-source community.</p>
-      <p className="rise mt-16 text-[11px] uppercase tracking-[0.1em] text-faint" style={{ ["--i" as string]: 1 }}>
+    <div className="mx-auto max-w-[600px] px-5 pt-20 text-center">
+      <p className="rise text-[18px]">{colophon.intro}</p>
+      <p className="rise mt-16 text-[12px] uppercase tracking-[0.1em] text-faint" style={{ ["--i" as string]: 1 }}>
         Credits
       </p>
-      <dl className="mt-6 space-y-2.5 text-[15px]">
-        {rows.map(([k, v], i) => (
-          <div key={k} className="rise grid grid-cols-2 gap-4" style={{ ["--i" as string]: i + 2 }}>
-            <dt className="text-right text-soft">{k}</dt>
-            <dd className="text-left">{v}</dd>
+      <dl className="mt-6 space-y-3 text-[16px]">
+        {colophon.rows.map(({ label, value }, i) => (
+          <div key={label} className="rise grid grid-cols-2 gap-4" style={{ ["--i" as string]: i + 2 }}>
+            <dt className="text-right text-soft">{label}</dt>
+            <dd className="text-left">{value}</dd>
           </div>
         ))}
       </dl>
