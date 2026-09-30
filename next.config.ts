@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
+import { withPayload } from "@payloadcms/next/withPayload";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+// STATIC_EXPORT=1 builds a plain static site in out/ with relative asset paths (see scripts/build-preview.sh).
+const staticExport = process.env.STATIC_EXPORT === "1";
 
-export default nextConfig;
+const nextConfig: NextConfig = staticExport
+  ? { output: "export", assetPrefix: ".", images: { unoptimized: true } }
+  : {};
+
+export default withPayload(nextConfig);

@@ -1,0 +1,244 @@
+// Starting content. It seeds the CMS on first run; after that, edit everything at /admin.
+// Items marked PLACEHOLDER need real content (photos, notes) before launch.
+
+export const me = {
+  name: "Abdul Momen",
+  short: "Momen",
+  email: "abdulmomen.official@gmail.com",
+  city: "Dhaka",
+  tagline: "I build AI products that work outside the demo.",
+  intro:
+    "AI engineer and founder of Oikko AI. I help teams turn a promising model into a product people rely on every day.",
+  socials: [
+    { label: "LinkedIn", href: "https://linkedin.com/in/abdulmomen01" },
+    { label: "GitHub", href: "https://github.com/AbdulMomen2" },
+    { label: "Oikko AI", href: "https://www.oikkoai.com" },
+  ],
+};
+
+export const nav = [
+  { label: "Home", href: "/" },
+  { label: "About", href: "/about" },
+  { label: "Work", href: "/work" },
+  { label: "Notes", href: "/notes" },
+];
+
+// Tucked under "More" in the header.
+export const moreNav = [
+  { label: "Photos", href: "/photos" },
+  { label: "Clients", href: "/clients" },
+  { label: "People", href: "/people" },
+  { label: "Colophon", href: "/colophon" },
+];
+
+export type Cover = "voice" | "grid" | "doc" | "stream" | "market" | "graph" | "ledger" | "fusion";
+
+export type Project = {
+  slug: string;
+  code: string;
+  title: string;
+  subtitle: string;
+  year: string;
+  featured?: boolean;
+  services: string[];
+  team: string;
+  cover: Cover;
+  intro: string;
+  sections: { heading: string; body: string; cover: Cover }[];
+};
+
+export const projects: Project[] = [
+  {
+    slug: "noteai",
+    code: "na",
+    title: "NoteAI",
+    subtitle: "Meetings that write their own follow-ups",
+    year: "2025",
+    featured: true,
+    services: ["AI engineering", "Speech", "Backend"],
+    team: "GTR product team",
+    cover: "voice",
+    intro:
+      "A meeting assistant that joins the call, listens in Bengali and English, and hands back a summary, tasks and CRM updates before everyone has left the room.",
+    sections: [
+      { heading: "Joining the call", body: "A bot joins Meet, Zoom or Teams and records each meeting on its own track, so nothing leaks between sessions.", cover: "voice" },
+      { heading: "Hearing Bengali properly", body: "Off-the-shelf speech models struggled with Bengali, so I tuned one on speech we recorded ourselves.", cover: "stream" },
+      { heading: "From transcript to action", body: "An agent reads the conversation and turns it into decisions, owners and CRM entries a person can approve.", cover: "ledger" },
+    ],
+  },
+  {
+    slug: "clausis",
+    code: "cl",
+    title: "Clausis",
+    subtitle: "Legal drafting you can trace back to the source",
+    year: "2026",
+    featured: true,
+    services: ["Oikko AI", "RAG", "API design"],
+    team: "Oikko AI",
+    cover: "doc",
+    intro:
+      "For legal teams, a clever sentence is useless if nobody can prove where it came from. We built drafting where every clause points back to the document it was drawn from.",
+    sections: [
+      { heading: "Reading scanned files", body: "Contracts arrive as scans. The system reads them and pulls out the facts a lawyer actually needs.", cover: "doc" },
+      { heading: "Every clause has a source", body: "Each generated line links to its evidence, so a reviewer can check it in one click.", cover: "graph" },
+    ],
+  },
+  {
+    slug: "chitra",
+    code: "ch",
+    title: "Chitra",
+    subtitle: "One front door for a family of products",
+    year: "2025",
+    featured: true,
+    services: ["Platform", "Identity", "Billing"],
+    team: "GTR platform team",
+    cover: "grid",
+    intro:
+      "Every product in the company needed sign-in, permissions and billing. Chitra gives them one shared place to get it right.",
+    sections: [
+      { heading: "Who can see what", body: "Access rules are set per company and per attribute, so each customer controls their own data.", cover: "grid" },
+      { heading: "Plans and payments", body: "Packages, subscriptions and payments work the same way across every product.", cover: "ledger" },
+    ],
+  },
+  {
+    slug: "oikko-marketplace",
+    code: "om",
+    title: "Oikko Marketplace",
+    subtitle: "Helping local manufacturers find buyers",
+    year: "2026",
+    featured: true,
+    services: ["Oikko AI", "Product", "Marketplace"],
+    team: "Oikko AI",
+    cover: "market",
+    intro:
+      "A B2B marketplace that connects buyers with manufacturers across Bangladesh, starting with packaging, plastics, light engineering and garment accessories.",
+    sections: [
+      { heading: "Two sides, one place", body: "Buyers search by category; manufacturers show what they can make and at what scale.", cover: "market" },
+    ],
+  },
+  {
+    slug: "jogajog",
+    code: "jj",
+    title: "Jogajog",
+    subtitle: "A CRM that retired the sales spreadsheet",
+    year: "2025",
+    services: ["Backend", "AI agents"],
+    team: "GTR product team",
+    cover: "ledger",
+    intro: "A multi-tenant CRM for pipelines, contacts and companies, with agents that research prospects and draft the first email.",
+    sections: [
+      { heading: "Research, drafted", body: "Agents gather what a salesperson would look up by hand and prepare an outreach draft for review.", cover: "graph" },
+    ],
+  },
+  {
+    slug: "private-inference",
+    code: "pi",
+    title: "Private Inference",
+    subtitle: "Running open models like a real service",
+    year: "2025",
+    services: ["LLMOps", "Open source"],
+    team: "Personal project",
+    cover: "stream",
+    intro: "A self-hosted setup for open models with queues, usage billing, dashboards and logs, all on a single GPU.",
+    sections: [
+      { heading: "Watching it run", body: "Every request is queued, metered and visible on a dashboard, so problems show up before users notice.", cover: "stream" },
+    ],
+  },
+  {
+    slug: "document-search",
+    code: "ds",
+    title: "Document Search",
+    subtitle: "Finding answers in tables and images, too",
+    year: "2025",
+    services: ["Retrieval", "Evaluation"],
+    team: "Personal project",
+    cover: "graph",
+    intro: "Search over PDFs that understands text, tables and images, measured on every change instead of eyeballed.",
+    sections: [
+      { heading: "Measured, not guessed", body: "Each change to retrieval runs through the same evaluation set before it ships.", cover: "graph" },
+    ],
+  },
+  {
+    slug: "civa-net",
+    code: "cv",
+    title: "CIVA-Net",
+    subtitle: "Spotting AI-generated content",
+    year: "2026",
+    services: ["Research"],
+    team: "Solo paper, ICECTE 2026",
+    cover: "fusion",
+    intro: "A research model that looks at text and images together to tell whether content was made by a person or a machine.",
+    sections: [
+      { heading: "Two signals, one answer", body: "Attention across both kinds of input catches cues that either one misses alone.", cover: "fusion" },
+    ],
+  },
+];
+
+export const approach = [
+  { title: "Start from the workflow", body: "I sit with the people who will use it first. The model comes second." },
+  { title: "Ship something small", body: "A working slice in real hands beats a perfect plan on a slide." },
+  { title: "Measure everything", body: "Traces, evals and costs are visible from day one, so we argue with data." },
+  { title: "Stay after launch", body: "Real use teaches the most. I keep improving what we shipped." },
+];
+
+// Mirrors the "talks / interviews / patents / playground" rhythm of the reference, with Momen's own record.
+export const papers = [
+  { title: "CIVA-Net: cross-modal attention for detecting AI-generated content", venue: "ICECTE", year: "2026", status: "Accepted" },
+  { title: "Reducing heuristic bias in natural language inference", venue: "IEEE QPAIN", year: "2026", status: "Under review" },
+];
+
+export const awards = [
+  { title: "Silver medal", where: "World Invention Competition & Exhibition, national round", year: "2025" },
+  { title: "Top 3", where: "Harvard HSIL Hackathon, Dhaka hub", year: "2025" },
+  { title: "2nd runner-up", where: "AI Hackathon, BRAC University", year: "" },
+];
+
+export const playground = [
+  { title: "Phone Advisor", body: "Ask about phones in plain language; an agent looks up the specs.", href: "https://github.com/AbdulMomen2/langgraph-phone-advisor" },
+  { title: "Golden Cross", body: "A small trading bot that follows one simple rule, for learning.", href: "https://github.com/AbdulMomen2/golden-cross-trading-bot" },
+  { title: "LangGraph, zero to advanced", body: "My notebooks from learning agent graphs, shared for others.", href: "https://github.com/AbdulMomen2/langgraph-zero-to-advance" },
+];
+
+// PLACEHOLDER: no notes yet. Add { title, year, href } items and the page groups them by year.
+export const notes: { title: string; year: string; href: string }[] = [];
+
+// PLACEHOLDER: replace with real photos in /public/photos and set src.
+export const photos = Array.from({ length: 20 }, (_, i) => ({ src: "", caption: `Photo ${i + 1}` }));
+
+export const clientTags = ["All", "AI", "Enterprise", "Legal", "Commerce", "Marketplace"] as const;
+export const clients: { name: string; note: string; tags: (typeof clientTags)[number][]; href?: string }[] = [
+  { name: "Clausis", note: "Legal drafting with sources", tags: ["AI", "Legal"] },
+  { name: "Genuine Technology & Research", note: "Enterprise AI products", tags: ["AI", "Enterprise"], href: "https://gtrbd.com" },
+  { name: "Horse riding company (UK)", note: "Booking and online store", tags: ["Commerce"] },
+  { name: "Oikko Marketplace", note: "B2B sourcing for manufacturers", tags: ["Marketplace"], href: "https://www.oikkoai.com/products" },
+  { name: "Shadin Food", note: "Online ordering", tags: ["Commerce"] },
+];
+
+export const peopleTags = ["All", "Oikko AI", "Engineering", "Product"] as const;
+// PLACEHOLDER: add colleagues and collaborators; tags drive the filter.
+export const people: { name: string; role: string; tags: (typeof peopleTags)[number][]; href?: string }[] = [
+  { name: "Shuvo Saha", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Product"] },
+  { name: "Apon Roy", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Engineering"] },
+  { name: "Arnob Dey", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Engineering"] },
+  { name: "Tithi Biswas", role: "Co-founder, Oikko AI", tags: ["Oikko AI", "Product"] },
+];
+
+export const homeAbout = {
+  heading: "I help teams get AI out of the prototype and into the hands of the people it was meant for.",
+  body: [
+    "I'm an AI engineer and the founder of Oikko AI. Most of my days go to the unglamorous middle of AI work: shaping the problem, wiring models into real systems, and making sure the result is fast, measured and trusted.",
+    "I work with enterprise teams that need something dependable, and with founders who need a builder who can move quickly without cutting the corners that matter.",
+  ],
+};
+
+export const contactHeading = "Got an idea for AI?\nLet's build it.";
+
+export const aboutPage = {
+  heading: "I turn promising AI ideas into products people rely on every day.",
+  body: [
+    "I'm an AI engineer and the founder of Oikko AI. I grew up in Bangladesh and learned to program by breaking things until they worked. Somewhere along the way I realised the interesting part of AI isn't the model. It's everything around it that makes a person trust it.",
+    "For enterprise teams, I build the systems that sit behind the demo: assistants that join meetings, search that reads contracts, and platforms that many products share. I care about the unglamorous parts, like evaluation, logging and cost, because that is where AI products succeed or quietly fail.",
+    "With Oikko AI, four friends and I make software for businesses that usually get it last, starting with a marketplace for local manufacturers and legal tools that always show their sources.",
+    "I work best with people who are honest about what they don't know yet and want to learn it quickly with real users. If that sounds like your team, I'd like to hear from you.",
+  ],
+};

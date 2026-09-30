@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Abdul Momen, personal site
 
-## Getting Started
+Next.js site with a built-in CMS (Payload). Everything on the site, from the headline and portrait to projects, notes, photos, clients and people, is edited at `/admin`.
 
-First, run the development server:
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env      # set PAYLOAD_SECRET
+npm run dev               # site at http://localhost:3000, CMS at http://localhost:3000/admin
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The first visit to `/admin` asks you to create your login. On first start the CMS fills itself with the starting content from `src/content.ts`; after that the CMS is the only place to edit.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## What you can edit
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Site & Home**: name, email, portrait, social links, headline, home About text, Approach steps, contact heading.
+- **About page**: heading and paragraphs.
+- **Projects**: title, subtitle, tags, cover image or video, intro and sections. Tick *Featured* to show a project in the home carousel. *Order* sets the order everywhere.
+- **Notes, Photos, Clients, People, Papers, Awards, Playground**: add, edit, reorder or delete.
 
-## Learn More
+Saving in the CMS updates the live site straight away.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Any Node host that runs Next.js works (Vercel, Railway, Render, a VPS).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Set `PAYLOAD_SECRET`.
+- Set `DATABASE_URL` to a Postgres database (for example Neon). Tables are created automatically on first start.
+- On Vercel, create a Blob store and set `BLOB_READ_WRITE_TOKEN` so uploaded images are kept. Elsewhere, uploads are saved to `media/`.
+- Visit `/admin` and create your login.
 
-## Deploy on Vercel
+## Preview build
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`npm run preview` exports a single static page with every route inside it, used for the claude.ai preview.

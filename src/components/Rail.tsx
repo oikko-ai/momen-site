@@ -1,0 +1,59 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useRef } from "react";
+import type { Project } from "@/lib/cms";
+import Visual from "./Visual";
+
+// Full-bleed horizontal showcase of featured work. Swipe or scroll sideways; snaps to each card.
+export default function Rail({ items }: { items: Project[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current!;
+    // Start with the first card centred, peeking the next one.
+    const first = el.children[0] as HTMLElement;
+    el.scrollLeft = first.offsetLeft - (el.clientWidth - first.clientWidth) / 2;
+  }, []);
+
+  const go = (dir: number) => {
+    const el = ref.current!;
+    el.scrollBy({ left: dir * (el.children[0] as HTMLElement).clientWidth, behavior: "smooth" });
+  };
+
+  return (
+    <div className="group/rail relative">
+      <div ref={ref} className="rail flex gap-4 overflow-x-auto px-[10vw] md:gap-6">
+        {items.map((p, i) => (
+          <Link
+            key={p.slug}
+            href={`/work/${p.slug}`}
+            className="rise group relative block w-[80vw] shrink-0 overflow-hidden rounded-xl md:w-[62vw]"
+            style={{ ["--i" as string]: i + 3 }}
+          >
+            <Visual media={p.image} cover={p.cover} className="aspect-[4/5] transition-transform duration-[1.2s] ease-[var(--ease)] group-hover:scale-[1.03] sm:aspect-[16/10]" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 pt-16 md:p-7 md:pt-24">
+              <h3 className="text-[17px] md:text-[20px]">{p.title}</h3>
+              <p className="mt-0.5 text-[14px] text-white/70">{p.subtitle}</p>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {p.services.map((s) => (
+                  <span key={s} className="chip">{s}</span>
+                ))}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+      {[-1, 1].map((d) => (
+        <button
+          key={d}
+          onClick={() => go(d)}
+          aria-label={d < 0 ? "Previous" : "Next"}
+          className={`absolute top-1/2 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-ink opacity-0 backdrop-blur-md transition-opacity duration-300 hover:bg-white/20 group-hover/rail:opacity-100 md:grid ${d < 0 ? "left-6" : "right-6"}`}
+        >
+          {d < 0 ? "←" : "→"}
+        </button>
+      ))}
+    </div>
+  );
+}
