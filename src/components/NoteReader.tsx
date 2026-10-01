@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { visitorId } from "@/lib/visitor";
 
 type Highlight = { text: string; count: number };
 type Props = {
@@ -33,7 +34,7 @@ const send = (id: string, body: object) =>
     ? fetch(`/api/notes/${id}/react`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ ...body, visitor: visitorId() }),
       })
         .then((r) => (r.ok ? r.json() : null))
         .catch(() => null)

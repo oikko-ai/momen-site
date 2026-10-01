@@ -71,6 +71,8 @@ export interface Config {
     notes: Note;
     subscribers: Subscriber;
     messages: Message;
+    conversations: Conversation;
+    activity: Activity;
     photos: Photo;
     clients: Client;
     people: Person;
@@ -102,6 +104,8 @@ export interface Config {
     notes: NotesSelect<false> | NotesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     messages: MessagesSelect<false> | MessagesSelect<true>;
+    conversations: ConversationsSelect<false> | ConversationsSelect<true>;
+    activity: ActivitySelect<false> | ActivitySelect<true>;
     photos: PhotosSelect<false> | PhotosSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     people: PeopleSelect<false> | PeopleSelect<true>;
@@ -124,11 +128,13 @@ export interface Config {
     site: Site;
     about: About;
     pages: Page;
+    chat: Chat;
   };
   globalsSelect: {
     site: SiteSelect<false> | SiteSelect<true>;
     about: AboutSelect<false> | AboutSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    chat: ChatSelect<false> | ChatSelect<true>;
   };
   locale: null;
   widgets: {
@@ -507,6 +513,80 @@ export interface Message {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations".
+ */
+export interface Conversation {
+  id: number;
+  /**
+   * The visitor's first question.
+   */
+  title?: string | null;
+  messages?:
+    | {
+        role: 'visitor' | 'assistant';
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  city?: string | null;
+  region?: string | null;
+  country?: string | null;
+  lat?: number | null;
+  lon?: number | null;
+  /**
+   * Remove from the public sidebar and map.
+   */
+  hidden?: boolean | null;
+  /**
+   * Sample conversation written to show the layout. Delete before launch.
+   */
+  demo?: boolean | null;
+  visitor?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Filled in by visitors' likes, highlights and chats. Tick Hidden to remove a line from the Activity page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity".
+ */
+export interface Activity {
+  id: number;
+  kind: 'like' | 'highlight' | 'chat';
+  target: 'note' | 'image' | 'video' | 'chat';
+  count?: number | null;
+  /**
+   * The note or project it happened on.
+   */
+  title?: string | null;
+  href?: string | null;
+  quote?: string | null;
+  /**
+   * Image or video shown beside the line.
+   */
+  thumb?: string | null;
+  /**
+   * Animated placeholder when there's no image.
+   */
+  cover?: ('voice' | 'grid' | 'doc' | 'stream' | 'market' | 'graph' | 'ledger' | 'fusion') | null;
+  city?: string | null;
+  region?: string | null;
+  /**
+   * Two-letter code
+   */
+  country?: string | null;
+  hidden?: boolean | null;
+  /**
+   * Sample line written to show the layout. Delete once real activity arrives.
+   */
+  demo?: boolean | null;
+  visitor?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "photos".
  */
 export interface Photo {
@@ -636,6 +716,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'messages';
         value: number | Message;
+      } | null)
+    | ({
+        relationTo: 'conversations';
+        value: number | Conversation;
+      } | null)
+    | ({
+        relationTo: 'activity';
+        value: number | Activity;
       } | null)
     | ({
         relationTo: 'photos';
@@ -814,6 +902,52 @@ export interface MessagesSelect<T extends boolean = true> {
   subject?: T;
   message?: T;
   read?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conversations_select".
+ */
+export interface ConversationsSelect<T extends boolean = true> {
+  title?: T;
+  messages?:
+    | T
+    | {
+        role?: T;
+        text?: T;
+        id?: T;
+      };
+  city?: T;
+  region?: T;
+  country?: T;
+  lat?: T;
+  lon?: T;
+  hidden?: T;
+  demo?: T;
+  visitor?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_select".
+ */
+export interface ActivitySelect<T extends boolean = true> {
+  kind?: T;
+  target?: T;
+  count?: T;
+  title?: T;
+  href?: T;
+  quote?: T;
+  thumb?: T;
+  cover?: T;
+  city?: T;
+  region?: T;
+  country?: T;
+  hidden?: T;
+  demo?: T;
+  visitor?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1120,6 +1254,31 @@ export interface Page {
     title: string;
     intro?: string | null;
   };
+  activity: {
+    title: string;
+    intro?: string | null;
+    someoneFrom?: string | null;
+    /**
+     * When the place is unknown.
+     */
+    someone?: string | null;
+    /**
+     * As in "3 times".
+     */
+    times?: string | null;
+    thisWeek?: string | null;
+    earlier?: string | null;
+    likedNote?: string | null;
+    likedImage?: string | null;
+    likedVideo?: string | null;
+    highlighted?: string | null;
+    startedChat?: string | null;
+    emptyText?: string | null;
+    /**
+     * Shown while sample lines are still in the list.
+     */
+    sampleText?: string | null;
+  };
   clients: {
     title: string;
     intro?: string | null;
@@ -1141,6 +1300,50 @@ export interface Page {
         }[]
       | null;
   };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat".
+ */
+export interface Chat {
+  id: number;
+  /**
+   * First bubble a visitor sees.
+   */
+  greeting: string;
+  suggestions?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  placeholder?: string | null;
+  /**
+   * Small print under the message box.
+   */
+  disclosure?: string | null;
+  /**
+   * Shown as the answer when the AI isn't connected (no ANTHROPIC_API_KEY) or in the static preview.
+   */
+  offlineText?: string | null;
+  conversationsTitle?: string | null;
+  newChatLabel?: string | null;
+  chatLabel?: string | null;
+  mapLabel?: string | null;
+  /**
+   * List visitors' past questions in the sidebar and on the map. Hide any single conversation under Inbox → Conversations.
+   */
+  showConversations?: boolean | null;
+  /**
+   * How the assistant should answer: voice, length, what to say about pricing or availability.
+   */
+  instructions?: string | null;
+  /**
+   * Extra facts the site doesn't show, e.g. how you like to work, rates, time zone. Everything else on the site is included automatically.
+   */
+  facts?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1251,6 +1454,24 @@ export interface PagesSelect<T extends boolean = true> {
         title?: T;
         intro?: T;
       };
+  activity?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        someoneFrom?: T;
+        someone?: T;
+        times?: T;
+        thisWeek?: T;
+        earlier?: T;
+        likedNote?: T;
+        likedImage?: T;
+        likedVideo?: T;
+        highlighted?: T;
+        startedChat?: T;
+        emptyText?: T;
+        sampleText?: T;
+      };
   clients?:
     | T
     | {
@@ -1278,6 +1499,32 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat_select".
+ */
+export interface ChatSelect<T extends boolean = true> {
+  greeting?: T;
+  suggestions?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  placeholder?: T;
+  disclosure?: T;
+  offlineText?: T;
+  conversationsTitle?: T;
+  newChatLabel?: T;
+  chatLabel?: T;
+  mapLabel?: T;
+  showConversations?: T;
+  instructions?: T;
+  facts?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -3,6 +3,8 @@ import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { pages as startPages, type Cover } from "@/content";
+import { chat as startChat } from "@/visitors-content";
+import { toActivity, toConversation } from "./feed";
 
 // Everything the site shows comes from here, read from the CMS.
 const payload = cache(() => getPayload({ config }));
@@ -234,6 +236,7 @@ export const getPages = cache(async () => {
   };
   return {
     home: merge("home", startPages.home),
+    activity: merge("activity", startPages.activity),
     work: merge("work", startPages.work),
     notes: merge("notes", startPages.notes),
     photos: merge("photos", startPages.photos),
@@ -246,3 +249,33 @@ export type Pages = Awaited<ReturnType<typeof getPages>>;
 
 // Filter chips: "All" plus every tag used, in first-seen order.
 export const tagsOf = (rows: { tags: string[] }[]) => ["All", ...new Set(rows.flatMap((r) => r.tags))];
+
+// Latest visitor activity and chats, as of this render. The pages refresh them in the browser.
+export const getActivity = cache(async () => {
+  const { docs } = await (await payload()).find({ collection: "activity", where: { hidden: { not_equals: true } }, sort: "-createdAt", limit: 100, depth: 0 });
+  return (docs as unknown as Record<string, unknown>[]).map(toActivity);
+});
+export const getConversations = cache(async () => {
+  const { docs } = await (await payload()).find({ collection: "conversations", where: { hidden: { not_equals: true } }, sort: "-createdAt", limit: 100, depth: 0 });
+  return (docs as unknown as Record<string, unknown>[]).map(toConversation);
+});
+
+// Chat page settings. Empty fields fall back to the starting text.
+export const getChat = cache(async () => {
+  const g = (await (await payload()).findGlobal({ slug: "chat" })) as unknown as Record<string, unknown>;
+  const text = (k: keyof typeof startChat) => str(g[k]) || (startChat[k] as string);
+  const suggestions = ((g.suggestions as { text: string }[]) ?? []).map((x) => x.text);
+  return {
+    greeting: text("greeting"),
+    suggestions: suggestions.length ? suggestions : startChat.suggestions.map((x) => x.text),
+    placeholder: text("placeholder"),
+    disclosure: text("disclosure"),
+    offlineText: text("offlineText"),
+    conversationsTitle: text("conversationsTitle"),
+    newChatLabel: text("newChatLabel"),
+    chatLabel: text("chatLabel"),
+    mapLabel: text("mapLabel"),
+    showConversations: g.showConversations !== false,
+  };
+});
+export type ChatSettings = Awaited<ReturnType<typeof getChat>>;

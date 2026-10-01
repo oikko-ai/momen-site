@@ -27,10 +27,10 @@ function Screen({ g, className = "" }: { g: GalleryImage; className?: string }) 
 }
 
 // One image or video with its frame, panel, caption and like button, all set in the CMS.
-function Tile({ g, id, i }: { g: GalleryImage; id: string; i: number }) {
+function Tile({ g, id, i, target }: { g: GalleryImage; id: string; i: number; target: { project: string; section: number; item: number } }) {
   const padded = g.frame !== "none" || (g.background !== "none" && g.fit === "contain");
   return (
-    <figure className={span[g.width]} data-inview style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
+    <figure id={`s${target.section}-${target.item}`} className={`scroll-mt-24 ${span[g.width]}`} data-inview style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
       <div className={`group/m relative overflow-hidden rounded-2xl ${panel[g.background]}`} style={{ aspectRatio: g.aspect }}>
         <div className={`settle absolute inset-0 ${padded ? "p-[5%]" : ""}`}>
           {g.frame === "browser" ? (
@@ -56,7 +56,7 @@ function Tile({ g, id, i }: { g: GalleryImage; id: string; i: number }) {
             <Screen g={g} className={`h-full w-full ${padded ? "rounded-lg" : ""}`} />
           )}
         </div>
-        <Like id={`${id}-${i}`} count={g.likes} />
+        <Like id={`${id}-${i}`} count={g.likes} target={target} />
       </div>
       {g.caption && <figcaption className="mt-3 text-small text-soft">{g.caption}</figcaption>}
     </figure>
@@ -124,7 +124,7 @@ export default async function ProjectView({ slug }: { slug: string }) {
           {s.gallery.length > 0 && (
             <div className={`grid grid-cols-12 gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10 ${s.heading || s.body ? "mt-block" : ""}`}>
               {s.gallery.map((g, j) => (
-                <Tile key={j} g={g} id={`${p.slug}-${k}`} i={j} />
+                <Tile key={j} g={g} id={`${p.slug}-${k}`} i={j} target={{ project: p.id, section: k, item: j }} />
               ))}
             </div>
           )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { visitorId } from "@/lib/visitor";
 
 const EVENT = "like-change";
 const read = (key: string) => {
@@ -19,8 +20,11 @@ const subscribe = (cb: () => void) => {
   };
 };
 
-// Heart with a count on a case study image. A visitor's own like is remembered in their browser.
-export default function Like({ id, count }: { id: string; count: number }) {
+type Target = { project: string; section: number; item: number };
+
+// Heart with a count on a case study image. A visitor's own like is remembered in their browser,
+// saved to the image's count in the CMS and shown on the Activity page.
+export default function Like({ id, count, target }: { id: string; count: number; target?: Target }) {
   const key = `like:${id}`;
   const liked = useSyncExternalStore(subscribe, () => read(key), () => false);
   const toggle = () => {
@@ -29,6 +33,12 @@ export default function Like({ id, count }: { id: string; count: number }) {
       else localStorage.setItem(key, "1");
     } catch {}
     dispatchEvent(new Event(EVENT));
+    if (target && !process.env.NEXT_PUBLIC_PREVIEW)
+      fetch(`/api/projects/${target.project}/like`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ section: target.section, item: target.item, on: !liked, visitor: visitorId() }),
+      }).catch(() => null);
   };
   const n = count + (liked ? 1 : 0);
   return (

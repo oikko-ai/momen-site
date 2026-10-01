@@ -26,8 +26,8 @@ export default function Footer({ site }: { site: Site }) {
         ))}
       </ul>
       <ul className="flex gap-6 font-mono text-label uppercase md:justify-end">
-        <li><Link className="hover:text-ink" href="/clients">Clients</Link></li>
-        <li><Link className="hover:text-ink" href="/people">People</Link></li>
+        <li><Link className="hover:text-ink" href="/activity">Activity</Link></li>
+        <li><Link className="hover:text-ink" href="/chat">Chat</Link></li>
         <li><Link className="hover:text-ink" href="/colophon">Colophon</Link></li>
       </ul>
       </div>

@@ -4,6 +4,7 @@ import "@fontsource-variable/inter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
+import HideOn from "@/components/HideOn";
 import { getSite } from "@/lib/cms";
 import "./globals.css";
 
@@ -19,10 +20,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${GeistMono.variable} antialiased`}>
       <body className="flex min-h-screen flex-col">
-        <Header name={site.name} available={site.available ? site.availableText : undefined} />
+        <HideOn prefix="/chat">
+          <Header name={site.name} available={site.available ? site.availableText : undefined} />
+        </HideOn>
         <Reveal />
         <main className="flex-1">{children}</main>
-        <Footer site={site} />
+        <HideOn prefix="/chat">
+          <Footer site={site} />
+        </HideOn>
       </body>
     </html>
   );

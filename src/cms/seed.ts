@@ -1,6 +1,7 @@
 import type { Payload } from "payload";
 import * as c from "../content";
 import { startNotes } from "../notes-content";
+import { chat, sampleActivity, sampleConversations } from "../visitors-content";
 import { toLexical } from "./lexical";
 
 type Row = Record<string, unknown> & { id: number | string };
@@ -8,7 +9,7 @@ type StartProject = (typeof c.projects)[number];
 const devices = ["phone", "laptop", "tablet"] as const;
 
 // Bump when the starting content gains something existing databases should receive once.
-const CONTENT_VERSION = 4;
+const CONTENT_VERSION = 5;
 
 // Gallery for a section: the media written in content.ts, or one full-width placeholder.
 const gallery = (s: StartProject["sections"][number]) =>
@@ -72,9 +73,19 @@ export async function seed(payload: Payload) {
   );
   for (const note of notes(projects)) await payload.create({ collection: "notes", data: note as never });
   for (const t of testimonials(clients, projects)) await payload.create({ collection: "testimonials", data: t as never });
+  await visitors(payload);
   await add("papers", c.papers);
   await add("awards", c.awards);
   await add("playground", c.playground);
+}
+
+// Chat settings, plus sample activity and conversations so the pages aren't empty before real visitors arrive.
+async function visitors(payload: Payload) {
+  await payload.updateGlobal({ slug: "chat", data: chat as never });
+  if (!(await payload.count({ collection: "activity" })).totalDocs)
+    for (const a of sampleActivity) await payload.create({ collection: "activity", data: a as never, context: { skipRefresh: true } });
+  if (!(await payload.count({ collection: "conversations" })).totalDocs)
+    for (const x of sampleConversations) await payload.create({ collection: "conversations", data: x as never, context: { skipRefresh: true } });
 }
 
 // Databases seeded by an earlier version: add what is new, once, without touching anything edited since.
@@ -168,6 +179,14 @@ async function upgrade(payload: Payload) {
     await payload.updateGlobal({ slug: "pages", data: data as never });
     const site = (await payload.findGlobal({ slug: "site" })) as unknown as { availableText?: string };
     if (!site.availableText) await payload.updateGlobal({ slug: "site", data: { available: c.me.available, availableText: c.me.availableText } as never });
+  }
+
+  if (version < 5) {
+    // Activity and Chat pages.
+    const current = (await payload.findGlobal({ slug: "pages" })) as unknown as Record<string, Record<string, unknown> | undefined>;
+    await payload.updateGlobal({ slug: "pages", data: { activity: { ...c.pages.activity, ...Object.fromEntries(Object.entries(current.activity ?? {}).filter(([, v]) => v)) } } as never });
+    const settings = (await payload.findGlobal({ slug: "chat" })) as unknown as { greeting?: string };
+    if (!settings.greeting) await visitors(payload);
   }
 
   await payload.updateGlobal({ slug: "pages", data: { contentVersion: CONTENT_VERSION } as never });

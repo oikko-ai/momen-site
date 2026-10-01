@@ -1,5 +1,6 @@
 import type { ArrayField, GlobalConfig } from "payload";
 import { refreshSite } from "./revalidate";
+import { Chat } from "./chat";
 
 const paragraphs = (name: string, label: string): ArrayField => ({
   name,
@@ -131,6 +132,45 @@ export const Pages: GlobalConfig = {
           ],
         },
         { label: "Photos", fields: [pageText("photos", "Photos page")] },
+        {
+          label: "Activity",
+          fields: [
+            pageText("activity", "Activity page", [
+              {
+                type: "row",
+                fields: [
+                  { name: "someoneFrom", type: "text", admin: { width: "34%" } },
+                  { name: "someone", type: "text", admin: { width: "33%", description: "When the place is unknown." } },
+                  { name: "times", type: "text", admin: { width: "33%", description: "As in \"3 times\"." } },
+                ],
+              },
+              {
+                type: "row",
+                fields: [
+                  { name: "thisWeek", type: "text", admin: { width: "50%" } },
+                  { name: "earlier", type: "text", admin: { width: "50%" } },
+                ],
+              },
+              {
+                type: "row",
+                fields: [
+                  { name: "likedNote", type: "text", admin: { width: "34%" } },
+                  { name: "likedImage", type: "text", admin: { width: "33%" } },
+                  { name: "likedVideo", type: "text", admin: { width: "33%" } },
+                ],
+              },
+              {
+                type: "row",
+                fields: [
+                  { name: "highlighted", type: "text", admin: { width: "50%" } },
+                  { name: "startedChat", type: "text", admin: { width: "50%" } },
+                ],
+              },
+              { name: "emptyText", type: "text" },
+              { name: "sampleText", type: "text", admin: { description: "Shown while sample lines are still in the list." } },
+            ]),
+          ],
+        },
         { label: "Clients", fields: [pageText("clients", "Clients page", [{ name: "visitLabel", type: "text", defaultValue: "Visit" }])] },
         { label: "People", fields: [pageText("people", "People page", [{ name: "projectsLabel", type: "text", defaultValue: "Worked on" }])] },
         {
@@ -146,4 +186,4 @@ export const Pages: GlobalConfig = {
   ],
 };
 
-export const globals = [Site, About, Pages];
+export const globals = [Site, About, Pages, Chat];

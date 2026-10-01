@@ -1,6 +1,7 @@
 import type { Block, CollectionConfig, Endpoint } from "payload";
 import { BlocksFeature, lexicalEditor } from "@payloadcms/richtext-lexical";
 import { refreshHooks } from "./revalidate";
+import { allow, ipOf, logActivity, visitorHash } from "./visitors";
 
 // An image or video placed inside a note, uploaded or linked.
 const NoteMedia: Block = {
@@ -37,7 +38,8 @@ const react: Endpoint = {
   method: "post",
   handler: async (req) => {
     const id = req.routeParams?.id as string;
-    const body = (await req.json?.().catch(() => ({}))) as { kind?: string; text?: string };
+    const body = (await req.json?.().catch(() => ({}))) as { kind?: string; text?: string; visitor?: string };
+    if (!allow(`react:${ipOf(req)}`, 120, 10 * 60_000)) return Response.json({ error: "Slow down" }, { status: 429 });
     const note = (await req.payload.findByID({ collection: "notes", id, depth: 0 }).catch(() => null)) as unknown as Record<string, unknown> | null;
     if (!note) return Response.json({ error: "Not found" }, { status: 404 });
     const data: Record<string, unknown> = {};
@@ -57,6 +59,14 @@ const react: Endpoint = {
       data.highlights = list.slice(-200);
     } else return Response.json({ error: "Unknown reaction" }, { status: 400 });
     const saved = (await req.payload.update({ collection: "notes", id, data, depth: 0, context: { skipRefresh: true } })) as unknown as Record<string, unknown>;
+    if (body.kind === "like" || body.kind === "highlight")
+      await logActivity(req.payload, req, visitorHash(body.visitor), {
+        kind: body.kind,
+        target: "note",
+        title: String(note.title ?? ""),
+        href: `/notes/${String(note.slug ?? "")}`,
+        quote: body.kind === "highlight" ? (body.text ?? "").replace(/\s+/g, " ").trim() : undefined,
+      });
     return Response.json({ likes: saved.likes ?? 0, views: saved.views ?? 0, highlights: saved.highlights ?? [] });
   },
 };

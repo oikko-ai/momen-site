@@ -60,6 +60,8 @@ body {
 
 ::selection { background: #f1f1ef; color: #050505; }
 :focus-visible { outline: 2px solid #f1f1ef; outline-offset: 3px; border-radius: 4px; }
+/* Fields inside a styled box show focus on the box instead. */
+.no-ring:focus-visible { outline: none; }
 
 /* The one page container. The header, every page and the footer share it, so edges line up everywhere. */
 @utility wrap { width: 100%; max-width: var(--container-page); margin-inline: auto; padding-inline: var(--spacing-gutter); }

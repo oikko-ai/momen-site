@@ -51,7 +51,7 @@ export default function ContactForm({ to }: { to: string }) {
     }
   };
 
-  const row = "flex items-center gap-4 border-b border-white/5 px-6 py-5 text-body md:px-8";
+  const row = "flex items-center gap-4 border-b border-white/5 px-6 py-5 text-body transition-colors focus-within:bg-white/[0.03] md:px-8";
   return (
     <form onSubmit={submit} className="overflow-hidden rounded-3xl border border-white/5 bg-[#141414]">
       <div className={row}>
@@ -60,11 +60,11 @@ export default function ContactForm({ to }: { to: string }) {
       </div>
       <label className={row} htmlFor="cf-from">
         <span className="w-20 shrink-0 text-faint">From</span>
-        <input id="cf-from" type="email" required value={from} onChange={(e) => setFrom(e.target.value)} placeholder="you@company.com" className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-faint" />
+        <input id="cf-from" type="email" required value={from} onChange={(e) => setFrom(e.target.value)} placeholder="you@company.com" className="no-ring min-w-0 flex-1 bg-transparent outline-none placeholder:text-faint" />
       </label>
       <label className={row} htmlFor="cf-subject">
         <span className="w-20 shrink-0 text-faint">Subject</span>
-        <input id="cf-subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="What should we build?" className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-faint" />
+        <input id="cf-subject" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="What should we build?" className="no-ring min-w-0 flex-1 bg-transparent outline-none placeholder:text-faint" />
       </label>
       {/* Left empty by people; bots that fill every field are ignored. */}
       <input name="company" tabIndex={-1} autoComplete="off" aria-hidden className="absolute -left-[9999px] h-0 w-0 opacity-0" />
@@ -76,7 +76,7 @@ export default function ContactForm({ to }: { to: string }) {
         onChange={(e) => setMessage(e.target.value)}
         rows={7}
         placeholder="A few lines about the product, the team and the timeline."
-        className="block w-full resize-none bg-transparent px-6 py-5 text-body outline-none placeholder:text-faint md:px-8"
+        className="no-ring block w-full resize-none bg-transparent transition-colors focus:bg-white/[0.03] px-6 py-5 text-body outline-none placeholder:text-faint md:px-8"
       />
       <div className="flex items-center justify-between gap-4 px-6 pb-6 md:px-8">
         <span role="status" className={`text-small ${state === "error" ? "text-[#f0a3a3]" : "text-soft"}`}>

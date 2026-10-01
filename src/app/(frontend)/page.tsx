@@ -12,6 +12,8 @@ import PhotosPage from "./photos/page";
 import ClientsPage from "./clients/page";
 import PeoplePage from "./people/page";
 import ColophonPage from "./colophon/page";
+import ActivityPage from "./activity/page";
+import ChatPage from "./chat/page";
 import ProjectView from "@/components/ProjectView";
 import Preview from "@/components/Preview";
 import Words from "@/components/Words";
@@ -160,6 +162,8 @@ export default async function Home() {
     ["/clients", <ClientsPage key="clients" />],
     ["/people", <PeoplePage key="people" />],
     ["/colophon", <ColophonPage key="colophon" />],
+    ["/activity", <ActivityPage key="activity" />],
+    ["/chat", <ChatPage key="chat" />],
   ];
   return (
     <>
