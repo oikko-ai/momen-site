@@ -7,16 +7,16 @@ import { pages as startPages, type Cover } from "@/content";
 // Everything the site shows comes from here, read from the CMS.
 const payload = cache(() => getPayload({ config }));
 
-type MediaDoc = { url?: string | null; alt?: string | null; mimeType?: string | null } | number | null | undefined;
+export type MediaDoc = { url?: string | null; alt?: string | null; mimeType?: string | null } | number | null | undefined;
 export type Media = { url: string; alt: string; video: boolean } | null;
-const media = (m: MediaDoc): Media =>
+export const media = (m: MediaDoc): Media =>
   m && typeof m === "object" && m.url ? { url: m.url, alt: m.alt ?? "", video: !!m.mimeType?.startsWith("video/") } : null;
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
 const all = cache(async (collection: "projects" | "notes" | "photos" | "clients" | "people" | "papers" | "awards" | "playground") => {
   const p = await payload();
-  const { docs } = await p.find({ collection, limit: 500, sort: "order", depth: 2 });
+  const { docs } = await p.find({ collection, limit: 500, sort: collection === "notes" ? "-date" : "order", depth: 2 });
   return docs as unknown as Record<string, unknown>[];
 });
 
@@ -62,7 +62,7 @@ const person = (m: Record<string, unknown>): Person => ({
 });
 
 // A linked image or video: YouTube and Vimeo become embeds, video files play inline.
-const linked = (url: string): { media: Media; embed?: string } => {
+export const linked = (url: string): { media: Media; embed?: string } => {
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{6,})/);
   if (yt) return { media: null, embed: `https://www.youtube-nocookie.com/embed/${yt[1]}?autoplay=1&mute=1&loop=1&playlist=${yt[1]}&controls=0` };
   const vimeo = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
@@ -134,7 +134,38 @@ export const getProjects = cache(async (): Promise<Project[]> =>
 
 const pick = <T,>(rows: Record<string, unknown>[], f: (d: Record<string, unknown>) => T) => rows.map(f);
 
-export const getNotes = cache(async () => pick(await all("notes"), (d) => ({ title: str(d.title), year: str(d.year), href: str(d.href) })));
+export type Note = {
+  id: string;
+  title: string;
+  slug: string;
+  date: string;
+  year: string;
+  summary: string;
+  href?: string;
+  cover: Media;
+  body: unknown;
+  highlights: { text: string; count: number }[];
+  likes: number;
+  views: number;
+};
+const num = (v: unknown) => (typeof v === "number" ? v : 0);
+// Newest first. A note's year comes from its date.
+export const getNotes = cache(async (): Promise<Note[]> =>
+  pick(await all("notes"), (d) => ({
+    id: String(d.id),
+    title: str(d.title),
+    slug: str(d.slug),
+    date: str(d.date),
+    year: str(d.date).slice(0, 4) || str(d.year),
+    summary: str(d.summary),
+    href: str(d.href) || undefined,
+    cover: media(d.cover as MediaDoc),
+    body: d.body ?? null,
+    highlights: ((d.highlights as { text: string; count?: number }[]) ?? []).map((h) => ({ text: h.text, count: h.count ?? 1 })),
+    likes: num(d.likes),
+    views: num(d.views),
+  })).sort((a, b) => b.date.localeCompare(a.date)),
+);
 export const getPhotos = cache(async () => pick(await all("photos"), (d) => ({ image: media(d.image as MediaDoc), caption: str(d.caption) })));
 export const getClients = cache(async () =>
   pick(await all("clients"), (d) => ({ name: str(d.name), note: str(d.note), tags: (d.tags as string[]) ?? [], href: str(d.href) || undefined })),

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from "payload";
 import { coverOptions } from "./options";
 import { refreshHooks } from "./revalidate";
+import { Notes, Subscribers } from "./notes";
 
 const publicRead = { read: () => true };
 const orderField = { name: "order", type: "number", defaultValue: 0, admin: { position: "sidebar", description: "Lower numbers show first." } } as const;
@@ -125,12 +126,6 @@ const simple = (slug: string, group: string, title: string, fields: CollectionCo
   fields: [...fields, orderField],
 });
 
-export const Notes = simple("notes", "Writing", "title", [
-  { name: "title", type: "text", required: true },
-  { name: "year", type: "text", required: true },
-  { name: "href", type: "text", label: "Link", required: true },
-]);
-
 export const Photos = simple("photos", "Library", "caption", [
   { name: "image", type: "upload", relationTo: "media", required: true },
   { name: "caption", type: "text" },
@@ -174,4 +169,4 @@ export const Playground = simple("playground", "About", "title", [
   { name: "href", type: "text", label: "Link" },
 ]);
 
-export const collections = [Projects, Notes, Photos, Clients, People, Papers, Awards, Playground, Media, Users];
+export const collections = [Projects, Notes, Subscribers, Photos, Clients, People, Papers, Awards, Playground, Media, Users];

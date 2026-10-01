@@ -1,12 +1,14 @@
 import type { Payload } from "payload";
 import * as c from "../content";
+import { startNotes } from "../notes-content";
+import { toLexical } from "./lexical";
 
 type Row = Record<string, unknown> & { id: number | string };
 type StartProject = (typeof c.projects)[number];
 const devices = ["phone", "laptop", "tablet"] as const;
 
 // Bump when the starting content gains something existing databases should receive once.
-const CONTENT_VERSION = 2;
+const CONTENT_VERSION = 3;
 
 // Gallery for a section: the media written in content.ts, or one full-width placeholder.
 const gallery = (s: StartProject["sections"][number]) =>
@@ -14,6 +16,8 @@ const gallery = (s: StartProject["sections"][number]) =>
 const sections = (p: StartProject) => p.sections.map((s) => ({ heading: s.heading, body: s.body, gallery: gallery(s) }));
 const team = (p: StartProject, people: Row[]) =>
   p.people ? p.people.map((n) => people.find((x) => x.name === n)?.id).filter(Boolean) : p.team === "Oikko AI" ? people.filter((x) => (x.tags as string[])?.includes("Oikko AI")).map((x) => x.id) : [];
+
+const notes = () => startNotes.map((n) => ({ ...n, body: toLexical(n.body) }));
 
 // First run: fill an empty CMS with the site's starting content. After that, the CMS is the source of truth.
 export async function seed(payload: Payload) {
@@ -58,7 +62,7 @@ export async function seed(payload: Payload) {
       sections: sections(p),
     })),
   );
-  await add("notes", c.notes);
+  for (const note of notes()) await payload.create({ collection: "notes", data: note as never });
   await add("clients", c.clients);
   await add("papers", c.papers);
   await add("awards", c.awards);
@@ -121,6 +125,15 @@ async function upgrade(payload: Payload) {
       }
       if (Object.keys(data).length) await payload.update({ collection: "projects", id: project.id, data: data as never });
     }
+  }
+
+  if (version < 3) {
+    // Notes became full articles: add the demo notes if there are none, and the new Notes page labels.
+    const { totalDocs } = await payload.count({ collection: "notes" });
+    if (!totalDocs) for (const note of notes()) await payload.create({ collection: "notes", data: note as never });
+    const current = (await payload.findGlobal({ slug: "pages" })) as unknown as { notes?: Record<string, unknown> };
+    const fill = Object.fromEntries(Object.entries(c.pages.notes).filter(([k]) => !current.notes?.[k]));
+    await payload.updateGlobal({ slug: "pages", data: { notes: { ...current.notes, ...fill } } as never });
   }
 
   await payload.updateGlobal({ slug: "pages", data: { contentVersion: CONTENT_VERSION } as never });

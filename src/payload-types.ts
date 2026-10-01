@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     projects: Project;
     notes: Note;
+    subscribers: Subscriber;
     photos: Photo;
     clients: Client;
     people: Person;
@@ -86,6 +87,7 @@ export interface Config {
   collectionsSelect: {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     notes: NotesSelect<false> | NotesSelect<true>;
+    subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     photos: PhotosSelect<false> | PhotosSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     people: PeopleSelect<false> | PeopleSelect<true>;
@@ -308,12 +310,70 @@ export interface Person {
 export interface Note {
   id: number;
   title: string;
-  year: string;
-  href: string;
   /**
-   * Lower numbers show first.
+   * Used in the address, e.g. /notes/evals-before-features
    */
-  order?: number | null;
+  slug: string;
+  date: string;
+  /**
+   * One or two sentences for link previews and search engines.
+   */
+  summary?: string | null;
+  /**
+   * Optional. If set, the Notes list links to this address instead of the note page.
+   */
+  href?: string | null;
+  /**
+   * Optional image shown under the title.
+   */
+  cover?: (number | null) | Media;
+  /**
+   * Headings, quotes, lists, links, images and videos. Use the + menu or type / to add blocks.
+   */
+  body?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Passages readers highlighted, shown as dotted underlines. Readers add to this list; you can edit or remove any.
+   */
+  highlights?:
+    | {
+        text: string;
+        count?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Readers' likes. Updated by the site.
+   */
+  likes?: number | null;
+  /**
+   * Page views. Updated by the site.
+   */
+  views?: number | null;
+  year?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers".
+ */
+export interface Subscriber {
+  id: number;
+  email: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -462,6 +522,10 @@ export interface PayloadLockedDocument {
         value: number | Note;
       } | null)
     | ({
+        relationTo: 'subscribers';
+        value: number | Subscriber;
+      } | null)
+    | ({
         relationTo: 'photos';
         value: number | Photo;
       } | null)
@@ -592,9 +656,31 @@ export interface ProjectsSelect<T extends boolean = true> {
  */
 export interface NotesSelect<T extends boolean = true> {
   title?: T;
-  year?: T;
+  slug?: T;
+  date?: T;
+  summary?: T;
   href?: T;
-  order?: T;
+  cover?: T;
+  body?: T;
+  highlights?:
+    | T
+    | {
+        text?: T;
+        count?: T;
+        id?: T;
+      };
+  likes?: T;
+  views?: T;
+  year?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "subscribers_select".
+ */
+export interface SubscribersSelect<T extends boolean = true> {
+  email?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -844,6 +930,13 @@ export interface Page {
     emptyText?: string | null;
     signupTitle?: string | null;
     signupText?: string | null;
+    /**
+     * Link to the RSS feed under the signup card.
+     */
+    rssLabel?: string | null;
+    signedUpText?: string | null;
+    allLabel?: string | null;
+    nextLabel?: string | null;
   };
   photos: {
     title: string;
@@ -945,6 +1038,10 @@ export interface PagesSelect<T extends boolean = true> {
         emptyText?: T;
         signupTitle?: T;
         signupText?: T;
+        rssLabel?: T;
+        signedUpText?: T;
+        allLabel?: T;
+        nextLabel?: T;
       };
   photos?:
     | T

@@ -291,8 +291,6 @@ export const playground = [
   { title: "LangGraph, zero to advanced", body: "My notebooks from learning agent graphs, shared for others.", href: "https://github.com/AbdulMomen2/langgraph-zero-to-advance" },
 ];
 
-// PLACEHOLDER: no notes yet. Add { title, year, href } items and the page groups them by year.
-export const notes: { title: string; year: string; href: string }[] = [];
 
 // PLACEHOLDER: replace with real photos in /public/photos and set src.
 export const photos = Array.from({ length: 20 }, (_, i) => ({ src: "", caption: `Photo ${i + 1}` }));
@@ -353,7 +351,11 @@ export const pages = {
     intro: "",
     emptyText: "The first notes are on their way.\nOn shipping AI that people trust, research, and building a company in Dhaka.",
     signupTitle: "Get new notes by email",
-    signupText: "Occasional writing on AI engineering, research and founding.",
+    signupText: "I write about AI engineering, research, and what I'm learning while building Oikko AI.",
+    rssLabel: "Subscribe via RSS",
+    signedUpText: "Thanks, you're on the list.",
+    allLabel: "All notes",
+    nextLabel: "Next note",
   },
   photos: { title: "Photos", intro: "" },
   clients: { title: "Clients", intro: "" },

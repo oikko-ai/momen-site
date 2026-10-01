@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getProjects, getSite } from "@/lib/cms";
+import { getNotes, getProjects, getSite } from "@/lib/cms";
 import Rail from "@/components/Rail";
 import WorkStrip from "@/components/WorkStrip";
 import ContactForm from "@/components/ContactForm";
@@ -7,6 +7,7 @@ import Portrait from "@/components/Portrait";
 import AboutPage from "./about/page";
 import WorkPage from "./work/page";
 import NotesPage from "./notes/page";
+import NoteView from "@/components/NoteView";
 import PhotosPage from "./photos/page";
 import ClientsPage from "./clients/page";
 import PeoplePage from "./people/page";
@@ -92,13 +93,14 @@ export async function HomeView() {
 // Used for the hosted preview, which can only serve a single page.
 export default async function Home() {
   if (process.env.NEXT_PUBLIC_PREVIEW !== "1") return <HomeView />;
-  const projects = await getProjects();
+  const [projects, notes] = await Promise.all([getProjects(), getNotes()]);
   const views: [string, React.ReactNode][] = [
     ["/", <HomeView key="home" />],
     ["/about", <AboutPage key="about" />],
     ["/work", <WorkPage key="work" />],
     ...projects.map((p): [string, React.ReactNode] => [`/work/${p.slug}`, <ProjectView key={p.slug} slug={p.slug} />]),
     ["/notes", <NotesPage key="notes" />],
+    ...notes.filter((n) => !n.href).map((n): [string, React.ReactNode] => [`/notes/${n.slug}`, <NoteView key={n.slug} slug={n.slug} />]),
     ["/photos", <PhotosPage key="photos" />],
     ["/clients", <ClientsPage key="clients" />],
     ["/people", <PeoplePage key="people" />],

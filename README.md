@@ -28,6 +28,7 @@ Any Node host that runs Next.js works (Vercel, Railway, Render, a VPS).
 - Set `PAYLOAD_SECRET`.
 - Set `DATABASE_URL` to a Postgres database (for example Neon). Tables are created automatically on first start.
 - On Vercel, create a Blob store and set `BLOB_READ_WRITE_TOKEN` so uploaded images are kept. Elsewhere, uploads are saved to `media/`.
+- Optional: set `NEXT_PUBLIC_SITE_URL` to your domain for full links in the notes RSS feed (`/notes/rss.xml`). Email signups are saved under Writing → Subscribers in the CMS.
 - Visit `/admin` and create your login.
 
 ## Preview build
