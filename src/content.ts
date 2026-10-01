@@ -18,6 +18,15 @@ export const me = {
   ],
 };
 
+// Facts published as structured data for search engines and AI assistants. Editable under Site & Home → Search & profile.
+export const profile = {
+  jobTitle: "AI engineer and founder of Oikko AI",
+  orgName: "Oikko AI",
+  orgUrl: "https://www.oikkoai.com",
+  orgDescription: "Oikko AI builds software for businesses that usually get it last, starting with a marketplace for local manufacturers and legal tools that show their sources.",
+  knowsAbout: ["AI engineering", "Large language model applications", "Retrieval-augmented generation", "AI evaluation", "Speech recognition", "AI product development"].map((topic) => ({ topic })),
+};
+
 // Header menu. Items marked "more" sit under the More button; the rest show in the bar.
 export const menu = [
   { label: "Home", href: "/", more: false },
@@ -27,12 +36,12 @@ export const menu = [
   { label: "Photos", href: "/photos", more: true },
   { label: "Clients", href: "/clients", more: true },
   { label: "People", href: "/people", more: true },
-  { label: "Colophon", href: "/colophon", more: true },
+  { label: "Credits", href: "/credits", more: true },
 ];
 export const footerLinks = [
   { label: "Activity", href: "/activity" },
   { label: "Chat", href: "/chat" },
-  { label: "Colophon", href: "/colophon" },
+  { label: "Credits", href: "/credits" },
 ];
 
 export type Cover = "voice" | "grid" | "doc" | "stream" | "market" | "graph" | "ledger" | "fusion";
@@ -345,6 +354,30 @@ export const aboutPage = {
     "With Oikko AI, four friends and I make software for businesses that usually get it last, starting with a marketplace for local manufacturers and legal tools that always show their sources.",
     "I work best with people who are honest about what they don't know yet and want to learn it quickly with real users. If that sounds like your team, I'd like to hear from you.",
   ],
+  faqTitle: "Questions",
+  // Written for clients and for AI assistants that quote answers. Edit under About page → Questions and answers.
+  faq: [
+    {
+      question: "What does Abdul Momen do?",
+      answer: "I'm an AI engineer and the founder of Oikko AI. I help teams turn a promising AI model into a product people rely on, covering everything around the model: data, evaluation, logging, cost and the interface people use.",
+    },
+    {
+      question: "Can you help an enterprise team ship an AI product?",
+      answer: "Yes. I build the systems behind the demo, such as meeting assistants, search that reads contracts and shared AI platforms, and I make them measurable from day one so the team can trust what ships.",
+    },
+    {
+      question: "How do you start a new project?",
+      answer: "I sit with the people who will use it first, then ship a small working slice into real hands. Traces, evals and costs are visible from the start, and I stay after launch to keep improving it.",
+    },
+    {
+      question: "What is Oikko AI?",
+      answer: "Oikko AI is the company I run with four friends. We make software for businesses that usually get it last, starting with a marketplace for local manufacturers and legal tools that always show their sources.",
+    },
+    {
+      question: "Where are you based, and how do I get in touch?",
+      answer: "I'm based in Dhaka, Bangladesh. The quickest way to start a conversation is the contact form on this site, or email.",
+    },
+  ],
 };
 
 // Titles and short texts for the list pages. Editable in the CMS under "Other pages".
@@ -438,20 +471,64 @@ export const pages = {
   },
   clients: { title: "Clients", intro: "", visitLabel: "Visit" },
   people: { title: "People", intro: "Good work is never solo. These are the people I build with, learn from and would happily work with again.", projectsLabel: "Worked on" },
-  colophon: {
-    title: "Colophon",
-    intro: "Built by hand, with thanks to the open-source community.",
-    rows: [
-      { label: "Design and words", value: "Abdul Momen" },
-      { label: "Framework", value: "Next.js" },
-      { label: "Content", value: "Payload CMS" },
-      { label: "Styling", value: "Tailwind CSS" },
-      { label: "Type", value: "Inter" },
-      { label: "Covers", value: "Drawn in code" },
-      { label: "Language", value: "TypeScript" },
-      { label: "Made in", value: "Dhaka" },
+  credits: {
+    title: "Credits",
+    intro: "With thanks to everyone who builds in the open.",
+    rollLabel: "Roll credits",
+    pauseLabel: "Pause",
+    thanksTitle: "Special thanks",
+    dedicationTitle: "Dedicated to",
+    dedication: "",
+    groups: [
+      {
+        title: "Cast",
+        rows: [
+          { role: "Design and words", name: "Abdul Momen", href: "" },
+          { role: "Development assistance", name: "Claude", href: "https://claude.ai" },
+          { role: "Application framework", name: "Next.js", href: "https://nextjs.org" },
+          { role: "Interface library", name: "React", href: "https://react.dev" },
+          { role: "Content management", name: "Payload CMS", href: "https://payloadcms.com" },
+          { role: "Styling", name: "Tailwind CSS", href: "https://tailwindcss.com" },
+          { role: "Language", name: "TypeScript", href: "https://www.typescriptlang.org" },
+        ],
+      },
+      {
+        title: "Typography",
+        rows: [
+          { role: "Headings and body", name: "Inter", href: "https://rsms.me/inter/" },
+          { role: "Utility text", name: "Geist Mono", href: "https://vercel.com/font" },
+        ],
+      },
+      {
+        title: "Interface and motion",
+        rows: [
+          { role: "Icons", name: "Lucide", href: "https://lucide.dev" },
+          { role: "Brand marks", name: "Simple Icons", href: "https://simpleicons.org" },
+          { role: "Covers and motion", name: "Drawn in code", href: "" },
+        ],
+      },
+      {
+        title: "Data and services",
+        rows: [
+          { role: "Chat answers", name: "Claude API", href: "https://www.anthropic.com/api" },
+          { role: "Database", name: "PostgreSQL on Neon", href: "https://neon.tech" },
+          { role: "Hosting and image storage", name: "Vercel", href: "https://vercel.com" },
+          { role: "Notes feed format", name: "RSS 2.0", href: "" },
+        ],
+      },
+      {
+        title: "Payload ensemble",
+        rows: [
+          { role: "Postgres adapter", name: "Payload Postgres", href: "" },
+          { role: "Next.js integration", name: "Payload for Next.js", href: "" },
+          { role: "Rich text", name: "Payload Lexical", href: "" },
+          { role: "Uploads", name: "Payload Vercel Blob storage", href: "" },
+        ],
+      },
     ],
+    thanks: [{ name: "The Oikko AI team", href: "https://www.oikkoai.com" }, { name: "The open-source community", href: "" }],
   },
+
 };
 
 // PLACEHOLDER testimonials. They mark where real quotes go and are shown with a Placeholder badge.

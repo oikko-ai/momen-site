@@ -6,7 +6,7 @@ export default async function NotFound() {
   const { labels } = await getPages();
   return (
     <div className="wrap">
-      <PageHead title={labels.notFoundTitle} />
+      <PageHead title={labels.notFoundTitle} showTitle />
       <Link href="/" className="u text-lead">
         {labels.notFoundLink}
       </Link>

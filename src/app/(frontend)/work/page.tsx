@@ -1,11 +1,14 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPages, getProjects, type Device } from "@/lib/cms";
+import { getPages, getProjects, getSite, type Device } from "@/lib/cms";
 import DeviceFrame from "@/components/DeviceFrame";
 import PageHead from "@/components/PageHead";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getPages()).work.title };
+  const [p, site, projects] = await Promise.all([getPages(), getSite(), getProjects()]);
+  const fallback = `Case studies by ${site.name}: ${projects.slice(0, 4).map((x) => x.title).join(", ")} and more.`;
+  return pageMeta({ title: p.work.title, description: p.work.intro || fallback, path: "/work", seo: p.seo("work") });
 }
 
 // How big each device sits inside its card.

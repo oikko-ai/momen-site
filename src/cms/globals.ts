@@ -2,6 +2,7 @@ import type { ArrayField, GlobalConfig } from "payload";
 import { refreshSite } from "./revalidate";
 import { Chat } from "./chat";
 import { pages as start } from "../content";
+import { seoField } from "./seo";
 
 // Links must be a page on this site (/about) or a full web address.
 const link = (v: unknown) => (typeof v !== "string" || !v ? true : /^(\/|https?:\/\/|mailto:)/.test(v) || "Start with / for a page here, or https:// for another site.");
@@ -93,6 +94,23 @@ export const Site: GlobalConfig = {
           ],
         },
         {
+          label: "Search & profile",
+          description: "How the site appears in Google, AI assistants (ChatGPT, Claude, Perplexity) and link previews. These facts are also published as structured data.",
+          fields: [
+            seoField("The home page. Also the default for any page without its own."),
+            {
+              type: "row",
+              fields: [
+                { name: "jobTitle", type: "text", admin: { width: "50%", description: "e.g. AI engineer and founder" } },
+                { name: "orgName", type: "text", label: "Company", admin: { width: "25%" } },
+                { name: "orgUrl", type: "text", label: "Company website", validate: link, admin: { width: "25%" } },
+              ],
+            },
+            { name: "orgDescription", type: "textarea", label: "Company description" },
+            { name: "knowsAbout", type: "array", labels: { singular: "Topic", plural: "Topics you're known for" }, admin: { description: "Short topics, e.g. Retrieval-augmented generation. Helps search engines and AI assistants connect you to them." }, fields: [{ name: "topic", type: "text", required: true }] },
+          ],
+        },
+        {
           label: "Home",
           fields: [
             { name: "tagline", type: "textarea", required: true, admin: { description: "The big headline at the top." } },
@@ -114,15 +132,35 @@ export const About: GlobalConfig = {
   access: { read: () => true },
   hooks: { afterChange: [refreshSite] },
   admin: { group: "Pages" },
-  fields: [{ name: "heading", type: "textarea", required: true }, paragraphs("body", "Text")],
+  fields: [
+    { name: "heading", type: "textarea", required: true },
+    paragraphs("body", "Text"),
+    {
+      name: "faq",
+      type: "array",
+      labels: { singular: "Question", plural: "Questions and answers" },
+      admin: { description: "Shown at the end of the About page and published as FAQ data, so search engines and AI assistants can quote the answers. Write the questions clients actually ask." },
+      fields: [
+        { name: "question", type: "text", required: true },
+        { name: "answer", type: "textarea", required: true },
+      ],
+    },
+    { name: "faqTitle", type: "text", label: "Questions heading" },
+    seoField(),
+  ],
 };
 
-const pageText = (name: string, label: string, extra: GlobalConfig["fields"] = []) =>
+const pageText = (name: string, label: string, extra: GlobalConfig["fields"] = [], defaultTitle?: string) =>
   ({
     name,
     label,
     type: "group",
-    fields: [{ name: "title", type: "text", required: true }, { name: "intro", type: "textarea" }, ...extra],
+    fields: [
+      { name: "title", type: "text", required: true, defaultValue: defaultTitle, admin: { description: "Not shown on the page. Used as the browser tab title and for search engines." } },
+      { name: "intro", type: "textarea", admin: { description: "Shown at the top of the page." } },
+      ...extra,
+      seoField(),
+    ],
   }) as GlobalConfig["fields"][number];
 
 // Titles and intro text for every other page, so nothing on the site is hard-coded.
@@ -233,11 +271,55 @@ export const Pages: GlobalConfig = {
         { label: "Clients", fields: [pageText("clients", "Clients page", [{ name: "visitLabel", type: "text", defaultValue: "Visit" }])] },
         { label: "People", fields: [pageText("people", "People page", [{ name: "projectsLabel", type: "text", defaultValue: "Worked on" }])] },
         {
-          label: "Colophon",
+          label: "Credits",
           fields: [
-            pageText("colophon", "Colophon page", [
-              { name: "rows", type: "array", fields: [{ name: "label", type: "text", required: true }, { name: "value", type: "text", required: true }] },
-            ]),
+            pageText("credits", "Credits page", [
+              {
+                type: "row",
+                fields: [
+                  { name: "rollLabel", type: "text", admin: { width: "50%", description: "Button that scrolls the credits like a film's end." } },
+                  { name: "pauseLabel", type: "text", admin: { width: "50%" } },
+                ],
+              },
+              { name: "music", type: "upload", relationTo: "media", admin: { description: "Optional audio that plays while the credits roll. Only use music you have the rights to." } },
+              {
+                name: "groups",
+                type: "array",
+                labels: { singular: "Group", plural: "Credit groups" },
+                admin: { description: "Each group has a small heading and rows of role and name." },
+                fields: [
+                  { name: "title", type: "text", required: true },
+                  {
+                    name: "rows",
+                    type: "array",
+                    fields: [
+                      {
+                        type: "row",
+                        fields: [
+                          { name: "role", type: "text", required: true, admin: { width: "35%" } },
+                          { name: "name", type: "text", required: true, admin: { width: "35%" } },
+                          { name: "href", type: "text", label: "Link", validate: link, admin: { width: "30%" } },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              { name: "thanksTitle", type: "text" },
+              { name: "thanks", type: "array", labels: { singular: "Name", plural: "Special thanks" }, fields: [{ type: "row", fields: [{ name: "name", type: "text", required: true, admin: { width: "50%" } }, { name: "href", type: "text", label: "Link", validate: link, admin: { width: "50%" } }] }] },
+              { type: "row", fields: [{ name: "dedicationTitle", type: "text", admin: { width: "40%" } }, { name: "dedication", type: "text", admin: { width: "60%", description: "Leave empty to hide." } }] },
+            ], "Credits"),
+            // The old Colophon page, kept so nothing written there is lost. Its rows were copied into Credits.
+            {
+              name: "colophon",
+              type: "group",
+              admin: { hidden: true },
+              fields: [
+                { name: "title", type: "text", required: true, defaultValue: "Colophon" },
+                { name: "intro", type: "textarea" },
+                { name: "rows", type: "array", fields: [{ name: "label", type: "text", required: true }, { name: "value", type: "text", required: true }] },
+              ],
+            },
           ],
         },
       ],

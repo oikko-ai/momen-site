@@ -1,3 +1,5 @@
+import JsonLd from "./JsonLd";
+import { noteGraph } from "@/lib/schema";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { RichText, type JSXConvertersFunction } from "@payloadcms/richtext-lexical/react";
@@ -26,7 +28,7 @@ const converters: JSXConvertersFunction = ({ defaultConverters }) => ({
                 <iframe src={file.embed} title={f.caption || "Video"} allow="autoplay; fullscreen; picture-in-picture" className="absolute inset-0 h-full w-full" />
               </div>
             ) : (
-              <Visual media={file.media} cover="graph" className="aspect-[16/9]" />
+              <Visual media={file.media} cover="graph" sizes="(min-width: 1080px) 1000px, 100vw" className="aspect-[16/9]" />
             )}
           </div>
           {f.caption && <figcaption className="mt-3 text-center text-small text-soft">{f.caption}</figcaption>}
@@ -50,6 +52,7 @@ export default async function NoteView({ slug }: { slug: string }) {
   const related = projects.filter((x) => n.projects.includes(x.id));
   return (
     <article className="wrap">
+      <JsonLd data={noteGraph(n, p.title, site.name)} />
       <ReadingProgress />
       <header className="mx-auto max-w-[1000px] pb-block pt-page text-center">
         <p className="rise eyebrow">{date(n.date)}</p>
@@ -60,7 +63,7 @@ export default async function NoteView({ slug }: { slug: string }) {
           </p>
         )}
       </header>
-      {n.cover && <Visual media={n.cover} cover="graph" className="rise mx-auto mb-block aspect-[16/9] max-w-[1000px] rounded-2xl" />}
+      {n.cover && <Visual media={n.cover} cover="graph" sizes="(min-width: 1080px) 1000px, 100vw" priority className="rise mx-auto mb-block aspect-[16/9] max-w-[1000px] rounded-2xl" />}
       <div className="rise mx-auto max-w-read" style={{ ["--i" as string]: 4 }}>
         <NoteReader id={n.id} likes={n.likes} views={n.views} highlights={n.highlights} labels={pages.labels}>
           {n.body ? <RichText data={n.body as never} converters={converters} disableContainer /> : null}

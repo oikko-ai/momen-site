@@ -1,3 +1,5 @@
+import JsonLd from "./JsonLd";
+import { projectGraph } from "@/lib/schema";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { getNotes, getPages, getProjects, getTestimonials, type GalleryImage } from "@/lib/cms";
@@ -17,6 +19,15 @@ const span: Record<GalleryImage["width"], string> = {
 };
 const panel = { none: "bg-card", dark: "bg-[#141414]", light: "bg-[#eeeeea]" };
 
+// Image widths on the 12-column grid, so each one downloads at the size it shows.
+const sizes = {
+  full: "(min-width: 1680px) 1600px, 100vw",
+  twoThirds: "(min-width: 768px) 66vw, 100vw",
+  half: "(min-width: 768px) 50vw, 100vw",
+  third: "(min-width: 768px) 33vw, 50vw",
+  quarter: "(min-width: 768px) 25vw, 50vw",
+};
+
 function Screen({ g, className = "" }: { g: GalleryImage; className?: string }) {
   if (g.embed)
     return (
@@ -24,7 +35,7 @@ function Screen({ g, className = "" }: { g: GalleryImage; className?: string }) 
         <iframe src={g.embed} title={g.caption || "Video"} allow="autoplay; fullscreen; picture-in-picture" className="absolute inset-0 h-full w-full" />
       </div>
     );
-  return <Visual media={g.media} cover={g.cover} fit={g.fit} className={className} />;
+  return <Visual media={g.media} cover={g.cover} fit={g.fit} sizes={sizes[g.width]} className={className} />;
 }
 
 // One image or video with its frame, panel, caption and like button, all set in the CMS.
@@ -78,6 +89,7 @@ export default async function ProjectView({ slug }: { slug: string }) {
   const writing = notes.filter((n) => n.projects.includes(p.id));
   return (
     <article className="wrap">
+      <JsonLd data={projectGraph(p, pages.work.title)} />
       <Words text={p.title} className="pt-page text-display font-light" />
 
       <div className="mt-block grid gap-10 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-16">

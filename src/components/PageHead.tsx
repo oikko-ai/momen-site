@@ -1,12 +1,13 @@
 import Words from "./Words";
 
-// Every page opens the same way: the title at the same height and size, then an optional intro.
-export default function PageHead({ title, intro, children }: { title: string; intro?: string; children?: React.ReactNode }) {
+// Every page opens the same way. The page name is the h1 for search engines and screen readers,
+// but stays hidden on screen unless showTitle is set; an optional intro leads the page instead.
+export default function PageHead({ title, intro, children, showTitle = false }: { title: string; intro?: string; children?: React.ReactNode; showTitle?: boolean }) {
   return (
-    <header className="pb-block pt-page">
-      <Words text={title} className="text-h1 font-light" />
+    <header className={showTitle || intro || children ? "pb-block pt-page" : "pt-page"}>
+      {showTitle ? <Words text={title} className="text-h1 font-light" /> : <h1 className="sr-only">{title}</h1>}
       {intro && (
-        <p className="rise mt-6 max-w-[48ch] text-lead text-soft" style={{ ["--i" as string]: 2 }}>
+        <p className={`rise max-w-[52ch] text-lead text-soft ${showTitle ? "mt-6" : ""}`} style={{ ["--i" as string]: 1 }}>
           {intro}
         </p>
       )}

@@ -1,10 +1,12 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
-import { getPeople, getPages, getSite, tagsOf } from "@/lib/cms";
+import { getPages, getPeople, getSite, tagsOf } from "@/lib/cms";
 import PageHead from "@/components/PageHead";
 import People from "./People";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getPages()).people.title };
+  const p = await getPages();
+  return pageMeta({ title: p.people.title, description: p.people.intro, path: "/people", seo: p.seo("people") });
 }
 
 export default async function Page() {

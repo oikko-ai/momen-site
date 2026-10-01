@@ -1,3 +1,4 @@
+import { pageMeta } from "@/lib/seo";
 import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -6,7 +7,8 @@ import Subscribe from "./Subscribe";
 import PageHead from "@/components/PageHead";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getPages()).notes.title };
+  const [p, site] = await Promise.all([getPages(), getSite()]);
+  return pageMeta({ title: p.notes.title, description: p.notes.intro || p.notes.signupText || `Notes by ${site.name}.`, path: "/notes", seo: p.seo("notes") });
 }
 
 export default async function Notes() {

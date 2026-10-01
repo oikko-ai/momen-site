@@ -6,7 +6,7 @@ import Visual from "./Visual";
 export default function DeviceFrame({ device, media, cover, className = "" }: { device: Device; media: Media; cover: CoverKind; className?: string }) {
   const screen = (
     <div className="absolute inset-0">
-      <Visual media={media} cover={cover} className="h-full w-full" />
+      <Visual media={media} cover={cover} sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw" className="h-full w-full" />
     </div>
   );
   if (device === "none") return <div className={`relative aspect-[4/3] overflow-hidden rounded-2xl ${className}`}>{screen}</div>;

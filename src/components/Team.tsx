@@ -15,11 +15,13 @@ export default function Team({ people, viewProfile }: { people: Person[]; viewPr
         return (
           <li key={p.name} className="group/p md:relative">
             <Tag
-              {...(p.href ? { href: p.href, target: "_blank", rel: "noreferrer" } : { tabIndex: 0 })}
-              aria-label={`${p.name}, ${p.role}`}
+              {...(p.href
+                ? { href: p.href, target: "_blank", rel: "noreferrer" }
+                : { tabIndex: 0, role: "img", "aria-label": `${p.name}, ${p.role}` })}
               className="block rounded-full ring-2 ring-paper transition-transform duration-300 ease-[var(--ease)] group-hover/p:-translate-y-1 group-focus-within/p:-translate-y-1"
             >
               <Avatar person={p} className="h-11 w-11" />
+              {p.href && <span className="sr-only">{`${p.name}, ${p.role}`}</span>}
             </Tag>
             <span
               role="tooltip"

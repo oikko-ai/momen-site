@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMeta } from "@/lib/seo";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getAwards, getClients, getNotes, getPages, getPapers, getPeople, getProjects, getSite, getTestimonials } from "@/lib/cms";
@@ -12,7 +14,7 @@ import NoteView from "@/components/NoteView";
 import PhotosPage from "./photos/page";
 import ClientsPage from "./clients/page";
 import PeoplePage from "./people/page";
-import ColophonPage from "./colophon/page";
+import CreditsPage from "./credits/page";
 import ActivityPage from "./activity/page";
 import ChatPage from "./chat/page";
 import ProjectView from "@/components/ProjectView";
@@ -22,6 +24,13 @@ import Available from "@/components/Available";
 import Stats from "@/components/Stats";
 import ClientStrip from "@/components/ClientStrip";
 import Testimonials from "@/components/Testimonials";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSite();
+  const meta = pageMeta({ title: site.seo.title || `${site.name}: ${site.jobTitle}`, description: site.intro, path: "/", seo: site.seo, ogTitle: site.tagline, kicker: site.jobTitle });
+  // The home title stands alone, without the site name added after it.
+  return { ...meta, title: { absolute: (meta.title as string) ?? site.name } };
+}
 
 export async function HomeView() {
   const [site, projects, pages, clients, people, notes, testimonials, papers, awards] = await Promise.all([
@@ -162,7 +171,7 @@ export default async function Home() {
     ["/photos", <PhotosPage key="photos" />],
     ["/clients", <ClientsPage key="clients" />],
     ["/people", <PeoplePage key="people" />],
-    ["/colophon", <ColophonPage key="colophon" />],
+    ["/credits", <CreditsPage key="credits" />],
     ["/activity", <ActivityPage key="activity" />],
     ["/chat", <ChatPage key="chat" />],
   ];

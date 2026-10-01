@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { CollectionConfig, Endpoint, GlobalConfig, Payload } from "payload";
 import { plainText } from "./notes";
 import { refreshSite } from "./revalidate";
+import { seoField } from "./seo";
 import { costOf, DEFAULT_MODEL, models, record, spent, type Model, type Usage } from "./usage";
 import { allow, editorsOnly, ipOf, logActivity, placeOf, publicUnlessHidden, visitorHash } from "./visitors";
 
@@ -36,6 +37,7 @@ export const Chat: GlobalConfig = {
                 { name: "mapLabel", type: "text", admin: { width: "25%" } },
               ],
             },
+            seoField(),
             { name: "showConversations", type: "checkbox", defaultValue: true, admin: { description: "List visitors' past questions in the sidebar and on the map. Hide any single conversation under Inbox → Conversations." } },
           ],
         },

@@ -65,12 +65,19 @@ In the CMS:
 
 Then test from your phone: send yourself a message from the contact form, sign up for notes, and ask the chat a question. Each should appear in the CMS under **Inbox** or **Writing**.
 
+## Search and AI answers
+
+- Every page has a **Search & sharing** section in the CMS (Pages → each tab, each project and each note): title, description, share image, and a switch to hide the page from search. Left empty, the page's own title and intro are used and a share image is drawn for it.
+- **Site & Home → Search & profile** holds the site-wide title and description and the facts search engines and AI assistants read about you: job title, company, company link and topics you know.
+- **Pages → About → FAQ** answers show on the About page and are marked up so Google and AI assistants can quote them. Keep them short and factual.
+- The site publishes `/sitemap.xml`, `/robots.txt` (search and AI crawlers allowed, the CMS blocked) and `/llms.txt`, a plain summary for AI assistants. All update themselves from the CMS.
+
 ## 8. Connect your domain
 
 1. In Vercel, open **Settings → Domains** and add your domain (for example `abdulmomen.com` and `www.abdulmomen.com`).
 2. Vercel shows the DNS records to add. Add them at your domain registrar. HTTPS is set up automatically once they resolve.
 3. Set `NEXT_PUBLIC_SITE_URL` to the domain and redeploy, so the sitemap, RSS feed and share links use it.
-4. Optional: submit `https://<domain>/sitemap.xml` in Google Search Console.
+4. Submit `https://<domain>/sitemap.xml` in Google Search Console and Bing Webmaster Tools. Bing also feeds ChatGPT search and Copilot.
 
 ## Where everything lands
 

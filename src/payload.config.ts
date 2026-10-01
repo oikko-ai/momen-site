@@ -23,7 +23,8 @@ if (process.env.VERCEL && !dbUrl.startsWith("postgres")) throw new Error("Set DA
 export default buildConfig({
   admin: {
     user: "users",
-    meta: { titleSuffix: " · Momen CMS" },
+    // The CMS stays out of search results.
+    meta: { titleSuffix: " · Momen CMS", robots: "noindex, nofollow", defaultOGImageType: "off" },
   },
   collections,
   globals,

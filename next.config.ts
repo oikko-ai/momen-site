@@ -6,6 +6,15 @@ const staticExport = process.env.STATIC_EXPORT === "1";
 
 const nextConfig: NextConfig = staticExport
   ? { output: "export", assetPrefix: ".", images: { unoptimized: true } }
-  : { experimental: { globalNotFound: true } };
+  : {
+      experimental: { globalNotFound: true },
+      images: {
+        formats: ["image/avif", "image/webp"],
+        // Uploads stored in Vercel Blob.
+        remotePatterns: [{ protocol: "https", hostname: "*.public.blob.vercel-storage.com" }],
+      },
+      // The Colophon page became Credits.
+      redirects: async () => [{ source: "/colophon", destination: "/credits", permanent: true }],
+    };
 
 export default withPayload(nextConfig);

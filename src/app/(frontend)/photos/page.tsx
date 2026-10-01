@@ -1,10 +1,12 @@
+import { pageMeta } from "@/lib/seo";
 import type { Metadata } from "next";
-import { getPages, getPhotos } from "@/lib/cms";
+import { getPages, getPhotos, getSite } from "@/lib/cms";
 import Gallery from "./Gallery";
 import PageHead from "@/components/PageHead";
 
 export async function generateMetadata(): Promise<Metadata> {
-  return { title: (await getPages()).photos.title };
+  const [p, site] = await Promise.all([getPages(), getSite()]);
+  return pageMeta({ title: p.photos.title, description: p.photos.intro || `Photos by ${site.name}.`, path: "/photos", seo: p.seo("photos") });
 }
 
 export default async function Photos() {

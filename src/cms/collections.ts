@@ -1,3 +1,4 @@
+import { seoField } from "./seo";
 import type { CollectionConfig } from "payload";
 import { coverOptions } from "./options";
 import { refreshHooks } from "./revalidate";
@@ -22,7 +23,7 @@ export const Media: CollectionConfig = {
   hooks: refreshHooks,
   access: publicRead,
   admin: { group: "Library" },
-  upload: { mimeTypes: ["image/*", "video/*"] },
+  upload: { mimeTypes: ["image/*", "video/*", "audio/*"] },
   fields: [{ name: "alt", type: "text", label: "Alt text" }],
 };
 
@@ -119,6 +120,7 @@ export const Projects: CollectionConfig = {
             },
           ],
         },
+        { label: "Search & sharing", fields: [seoField("How this case study appears in Google, AI answers and link previews. Empty fields use the title and intro.")] },
       ],
     },
     orderField,

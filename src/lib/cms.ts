@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { footerLinks as startFooter, menu as startMenu, pages as startPages, type Cover } from "@/content";
+import { aboutPage as startAbout, footerLinks as startFooter, menu as startMenu, pages as startPages, profile as startProfile, type Cover } from "@/content";
 import { chat as startChat } from "@/visitors-content";
 import { toActivity, toConversation } from "./feed";
 
@@ -15,6 +15,13 @@ export const media = (m: MediaDoc): Media =>
   m && typeof m === "object" && m.url ? { url: m.url, alt: m.alt ?? "", video: !!m.mimeType?.startsWith("video/") } : null;
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
+
+// A page's "Search & sharing" fields. Empty values fall back to the page's own text where it is used.
+export type Seo = { title: string; description: string; image: Media; noindex: boolean };
+const seoOf = (v: unknown): Seo => {
+  const s = (v && typeof v === "object" ? v : {}) as Record<string, unknown>;
+  return { title: str(s.title), description: str(s.description), image: media(s.image as MediaDoc), noindex: !!s.noindex };
+};
 
 type Listed = "projects" | "notes" | "photos" | "clients" | "people" | "papers" | "awards" | "playground" | "testimonials";
 // Reverse lookups (a client's projects, a person's projects) are worked out here from the forward links, so joins are skipped.
@@ -43,6 +50,8 @@ export type Project = {
   cover: Cover;
   image: Media;
   intro: string;
+  seo: Seo;
+  updatedAt: string;
   sections: { heading: string; body: string; gallery: GalleryImage[] }[];
 };
 export type Device = "phone" | "tablet" | "laptop" | "none";
@@ -96,6 +105,12 @@ export const getSite = cache(async () => {
     aboutBody: ((s.aboutBody as { text: string }[]) ?? []).map((p) => p.text),
     approach: ((s.approach as { title: string; body: string }[]) ?? []).map(({ title, body }) => ({ title, body })),
     contactHeading: (s.contactHeading as string) ?? "",
+    seo: seoOf(s.seo),
+    jobTitle: str(s.jobTitle) || startProfile.jobTitle,
+    orgName: str(s.orgName) || startProfile.orgName,
+    orgUrl: str(s.orgUrl) || startProfile.orgUrl,
+    orgDescription: str(s.orgDescription) || startProfile.orgDescription,
+    knowsAbout: ((s.knowsAbout as { topic: string }[] | undefined)?.length ? (s.knowsAbout as { topic: string }[]) : startProfile.knowsAbout).map((k) => k.topic),
     menu: ((s.menu as { label: string; href: string; more?: boolean }[] | undefined)?.length ? (s.menu as typeof startMenu) : startMenu).map(({ label, href, more }) => ({ label, href, more: !!more })),
     footerLinks: ((s.footerLinks as { label: string; href: string }[] | undefined)?.length ? (s.footerLinks as typeof startFooter) : startFooter).map(({ label, href }) => ({ label, href })),
   };
@@ -103,8 +118,14 @@ export const getSite = cache(async () => {
 export type Site = Awaited<ReturnType<typeof getSite>>;
 
 export const getAbout = cache(async () => {
-  const a = (await (await payload()).findGlobal({ slug: "about" })) as unknown as { heading?: string; body?: { text: string }[] };
-  return { heading: a.heading ?? "", body: (a.body ?? []).map((p) => p.text) };
+  const a = (await (await payload()).findGlobal({ slug: "about" })) as unknown as { heading?: string; body?: { text: string }[]; faq?: { question: string; answer: string }[]; faqTitle?: string; seo?: unknown };
+  return {
+    heading: a.heading ?? "",
+    body: (a.body ?? []).map((p) => p.text),
+    faq: (a.faq ?? []).map(({ question, answer }) => ({ question, answer })),
+    faqTitle: a.faqTitle || startAbout.faqTitle,
+    seo: seoOf(a.seo),
+  };
 });
 
 export const getProjects = cache(async (): Promise<Project[]> =>
@@ -125,6 +146,8 @@ export const getProjects = cache(async (): Promise<Project[]> =>
     cover: ((d.cover as Cover) ?? "graph") as Cover,
     image: media(d.image as MediaDoc),
     intro: (d.intro as string) ?? "",
+    seo: seoOf(d.seo),
+    updatedAt: str(d.updatedAt),
     sections: ((d.sections as Record<string, unknown>[]) ?? []).map((s) => ({
       heading: str(s.heading),
       body: str(s.body),
@@ -163,6 +186,8 @@ export type Note = {
   likes: number;
   views: number;
   projects: string[];
+  seo: Seo;
+  updatedAt: string;
 };
 const num = (v: unknown) => (typeof v === "number" ? v : 0);
 // Newest first. A note's year comes from its date.
@@ -181,6 +206,8 @@ export const getNotes = cache(async (): Promise<Note[]> =>
     likes: num(d.likes),
     views: num(d.views),
     projects: ((d.projects as unknown[]) ?? []).map(idStr).filter(Boolean),
+    seo: seoOf(d.seo),
+    updatedAt: str(d.updatedAt),
   })).sort((a, b) => b.date.localeCompare(a.date)),
 );
 export const getPhotos = cache(async () => pick(await all("photos"), (d) => ({ image: media(d.image as MediaDoc), caption: str(d.caption) })));
@@ -236,7 +263,7 @@ export const getPages = cache(async () => {
     const v = g[key] ?? {};
     return Object.fromEntries(Object.entries(start).map(([k, d]) => [k, Array.isArray(d) ? ((v[k] as unknown[])?.length ? v[k] : d) : str(v[k]) || (k === "intro" ? "" : d)])) as T;
   };
-  return {
+  const pages = {
     home: merge("home", startPages.home),
     activity: merge("activity", startPages.activity),
     work: merge("work", startPages.work),
@@ -247,8 +274,11 @@ export const getPages = cache(async () => {
     labels: merge("labels", startPages.labels),
     clients: merge("clients", startPages.clients),
     people: merge("people", startPages.people),
-    colophon: merge("colophon", startPages.colophon),
+    credits: { ...merge("credits", startPages.credits), music: media(g.credits?.music as MediaDoc) },
   };
+  // Each page's Search & sharing fields sit beside its texts.
+  const seo = (key: string) => seoOf(g[key]?.seo);
+  return { ...pages, seo };
 });
 export type Pages = Awaited<ReturnType<typeof getPages>>;
 
@@ -281,6 +311,7 @@ export const getChat = cache(async () => {
     chatLabel: text("chatLabel"),
     mapLabel: text("mapLabel"),
     showConversations: g.showConversations !== false,
+    seo: seoOf(g.seo),
   };
 });
 export type ChatSettings = Awaited<ReturnType<typeof getChat>>;

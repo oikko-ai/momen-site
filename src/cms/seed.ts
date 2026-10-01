@@ -9,7 +9,7 @@ type StartProject = (typeof c.projects)[number];
 const devices = ["phone", "laptop", "tablet"] as const;
 
 // Bump when the starting content gains something existing databases should receive once.
-const CONTENT_VERSION = 6;
+const CONTENT_VERSION = 7;
 
 // Gallery for a section: the media written in content.ts, or one full-width placeholder.
 const gallery = (s: StartProject["sections"][number]) =>
@@ -47,11 +47,12 @@ export async function seed(payload: Payload) {
       contactHeading: c.contactHeading,
       menu: c.menu,
       footerLinks: c.footerLinks,
+      ...c.profile,
     },
   });
   await payload.updateGlobal({
     slug: "about",
-    data: { heading: c.aboutPage.heading, body: c.aboutPage.body.map((text) => ({ text })) },
+    data: { heading: c.aboutPage.heading, body: c.aboutPage.body.map((text) => ({ text })), faq: c.aboutPage.faq, faqTitle: c.aboutPage.faqTitle },
   });
   await payload.updateGlobal({ slug: "pages", data: { ...c.pages, contentVersion: CONTENT_VERSION } as never });
 
@@ -204,6 +205,19 @@ async function upgrade(payload: Payload) {
     });
     const settings = (await payload.findGlobal({ slug: "chat" })) as unknown as { ai?: Record<string, unknown> };
     await payload.updateGlobal({ slug: "chat", data: { ai: { ...ai, ...Object.fromEntries(Object.entries(settings.ai ?? {}).filter(([, v]) => v != null)) } } as never });
+  }
+
+  if (version < 7) {
+    // Colophon becomes Credits; search profile and FAQ get starting text.
+    const current = (await payload.findGlobal({ slug: "pages" })) as unknown as { credits?: { groups?: unknown[] } };
+    if (!current.credits?.groups?.length) await payload.updateGlobal({ slug: "pages", data: { credits: c.pages.credits } as never });
+    type Link = { label: string; href: string; more?: boolean };
+    const site = (await payload.findGlobal({ slug: "site" })) as unknown as Record<string, unknown> & { menu?: Link[]; footerLinks?: Link[] };
+    const credits = (links?: Link[]) => links?.map(({ label, href, more }) => (href === "/colophon" ? { label: label === "Colophon" ? "Credits" : label, href: "/credits", more } : { label, href, more }));
+    const profile = Object.fromEntries(Object.entries(c.profile).filter(([k]) => !(Array.isArray(site[k]) ? (site[k] as unknown[]).length : site[k])));
+    await payload.updateGlobal({ slug: "site", data: { menu: credits(site.menu), footerLinks: credits(site.footerLinks)?.map(({ label, href }) => ({ label, href })), ...profile } as never });
+    const about = (await payload.findGlobal({ slug: "about" })) as unknown as { faq?: unknown[]; faqTitle?: string };
+    await payload.updateGlobal({ slug: "about", data: { ...(!about.faq?.length && { faq: c.aboutPage.faq }), ...(!about.faqTitle && { faqTitle: c.aboutPage.faqTitle }) } as never });
   }
 
   await payload.updateGlobal({ slug: "pages", data: { contentVersion: CONTENT_VERSION } as never });

@@ -24,11 +24,11 @@ export default function Avatar({ name, image, className = "", square = false }: 
     >
       {image ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={image.url} alt={name} className="absolute inset-0 h-full w-full object-cover" />
+        <img src={image.url} alt="" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
       ) : (
         <>
           <span className="pointer-events-none absolute inset-0 rounded-[inherit] shadow-[inset_0_1px_0_rgba(255,255,255,0.25),inset_0_-12px_24px_rgba(0,0,0,0.25)]" />
-          <span className="relative tracking-[0.02em]" style={{ fontSize: "38cqh" }}>
+          <span aria-hidden className="relative tracking-[0.02em]" style={{ fontSize: "38cqh" }}>
             {initials(name)}
           </span>
         </>

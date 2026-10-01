@@ -286,6 +286,24 @@ export interface Project {
       }[]
     | null;
   /**
+   * How this case study appears in Google, AI answers and link previews. Empty fields use the title and intro.
+   */
+  seo?: {
+    /**
+     * Best at 50 to 60 characters. The site name is added after it.
+     */
+    title?: string | null;
+    /**
+     * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+     */
+    description?: string | null;
+    /**
+     * Share image, 1200 × 630. Empty uses a generated one with the title.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
+  /**
    * Lower numbers show first.
    */
   order?: number | null;
@@ -446,6 +464,24 @@ export interface Note {
    * Projects this note is about, shown as cards at the end of the note.
    */
   projects?: (number | Project)[] | null;
+  /**
+   * How this note appears in Google, AI answers and link previews. Empty fields use the title and summary.
+   */
+  seo?: {
+    /**
+     * Best at 50 to 60 characters. The site name is added after it.
+     */
+    title?: string | null;
+    /**
+     * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+     */
+    description?: string | null;
+    /**
+     * Share image, 1200 × 630. Empty uses a generated one with the title.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
   /**
    * Headings, quotes, lists, links, images and videos. Use the + menu or type / to add blocks.
    */
@@ -886,6 +922,14 @@ export interface ProjectsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -902,6 +946,14 @@ export interface NotesSelect<T extends boolean = true> {
   href?: T;
   cover?: T;
   projects?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
   body?: T;
   highlights?:
     | T
@@ -1239,6 +1291,40 @@ export interface Site {
       }[]
     | null;
   /**
+   * The home page. Also the default for any page without its own.
+   */
+  seo?: {
+    /**
+     * Best at 50 to 60 characters. The site name is added after it.
+     */
+    title?: string | null;
+    /**
+     * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+     */
+    description?: string | null;
+    /**
+     * Share image, 1200 × 630. Empty uses a generated one with the title.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
+  /**
+   * e.g. AI engineer and founder
+   */
+  jobTitle?: string | null;
+  orgName?: string | null;
+  orgUrl?: string | null;
+  orgDescription?: string | null;
+  /**
+   * Short topics, e.g. Retrieval-augmented generation. Helps search engines and AI assistants connect you to them.
+   */
+  knowsAbout?:
+    | {
+        topic: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * The big headline at the top.
    */
   tagline: string;
@@ -1280,6 +1366,35 @@ export interface About {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Shown at the end of the About page and published as FAQ data, so search engines and AI assistants can quote the answers. Write the questions clients actually ask.
+   */
+  faq?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  faqTitle?: string | null;
+  /**
+   * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+   */
+  seo?: {
+    /**
+     * Best at 50 to 60 characters. The site name is added after it.
+     */
+    title?: string | null;
+    /**
+     * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+     */
+    description?: string | null;
+    /**
+     * Share image, 1200 × 630. Empty uses a generated one with the title.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1309,14 +1424,44 @@ export interface Page {
       | null;
   };
   work: {
+    /**
+     * Not shown on the page. Used as the browser tab title and for search engines.
+     */
     title: string;
+    /**
+     * Shown at the top of the page.
+     */
     intro?: string | null;
     nextLabel?: string | null;
     clientLabel?: string | null;
     relatedNotesLabel?: string | null;
+    /**
+     * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+     */
+    seo?: {
+      /**
+       * Best at 50 to 60 characters. The site name is added after it.
+       */
+      title?: string | null;
+      /**
+       * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+       */
+      description?: string | null;
+      /**
+       * Share image, 1200 × 630. Empty uses a generated one with the title.
+       */
+      image?: (number | null) | Media;
+      noindex?: boolean | null;
+    };
   };
   notes: {
+    /**
+     * Not shown on the page. Used as the browser tab title and for search engines.
+     */
     title: string;
+    /**
+     * Shown at the top of the page.
+     */
     intro?: string | null;
     /**
      * Shown while there are no notes.
@@ -1334,10 +1479,52 @@ export interface Page {
     allLabel?: string | null;
     nextLabel?: string | null;
     relatedLabel?: string | null;
+    /**
+     * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+     */
+    seo?: {
+      /**
+       * Best at 50 to 60 characters. The site name is added after it.
+       */
+      title?: string | null;
+      /**
+       * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+       */
+      description?: string | null;
+      /**
+       * Share image, 1200 × 630. Empty uses a generated one with the title.
+       */
+      image?: (number | null) | Media;
+      noindex?: boolean | null;
+    };
   };
   photos: {
+    /**
+     * Not shown on the page. Used as the browser tab title and for search engines.
+     */
     title: string;
+    /**
+     * Shown at the top of the page.
+     */
     intro?: string | null;
+    /**
+     * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+     */
+    seo?: {
+      /**
+       * Best at 50 to 60 characters. The site name is added after it.
+       */
+      title?: string | null;
+      /**
+       * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+       */
+      description?: string | null;
+      /**
+       * Share image, 1200 × 630. Empty uses a generated one with the title.
+       */
+      image?: (number | null) | Media;
+      noindex?: boolean | null;
+    };
   };
   /**
    * Section titles on the About page. The heading and text are under About page.
@@ -1390,7 +1577,13 @@ export interface Page {
     notFoundLink?: string | null;
   };
   activity: {
+    /**
+     * Not shown on the page. Used as the browser tab title and for search engines.
+     */
     title: string;
+    /**
+     * Shown at the top of the page.
+     */
     intro?: string | null;
     someoneFrom?: string | null;
     /**
@@ -1413,24 +1606,157 @@ export interface Page {
      * Shown while sample lines are still in the list.
      */
     sampleText?: string | null;
+    /**
+     * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+     */
+    seo?: {
+      /**
+       * Best at 50 to 60 characters. The site name is added after it.
+       */
+      title?: string | null;
+      /**
+       * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+       */
+      description?: string | null;
+      /**
+       * Share image, 1200 × 630. Empty uses a generated one with the title.
+       */
+      image?: (number | null) | Media;
+      noindex?: boolean | null;
+    };
   };
   clients: {
+    /**
+     * Not shown on the page. Used as the browser tab title and for search engines.
+     */
     title: string;
+    /**
+     * Shown at the top of the page.
+     */
     intro?: string | null;
     visitLabel?: string | null;
+    /**
+     * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+     */
+    seo?: {
+      /**
+       * Best at 50 to 60 characters. The site name is added after it.
+       */
+      title?: string | null;
+      /**
+       * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+       */
+      description?: string | null;
+      /**
+       * Share image, 1200 × 630. Empty uses a generated one with the title.
+       */
+      image?: (number | null) | Media;
+      noindex?: boolean | null;
+    };
   };
   people: {
+    /**
+     * Not shown on the page. Used as the browser tab title and for search engines.
+     */
     title: string;
+    /**
+     * Shown at the top of the page.
+     */
     intro?: string | null;
     projectsLabel?: string | null;
+    /**
+     * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+     */
+    seo?: {
+      /**
+       * Best at 50 to 60 characters. The site name is added after it.
+       */
+      title?: string | null;
+      /**
+       * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+       */
+      description?: string | null;
+      /**
+       * Share image, 1200 × 630. Empty uses a generated one with the title.
+       */
+      image?: (number | null) | Media;
+      noindex?: boolean | null;
+    };
   };
-  colophon: {
+  credits: {
+    /**
+     * Not shown on the page. Used as the browser tab title and for search engines.
+     */
     title: string;
+    /**
+     * Shown at the top of the page.
+     */
+    intro?: string | null;
+    /**
+     * Button that scrolls the credits like a film's end.
+     */
+    rollLabel?: string | null;
+    pauseLabel?: string | null;
+    /**
+     * Optional audio that plays while the credits roll. Only use music you have the rights to.
+     */
+    music?: (number | null) | Media;
+    /**
+     * Each group has a small heading and rows of role and name.
+     */
+    groups?:
+      | {
+          title: string;
+          rows?:
+            | {
+                role: string;
+                name: string;
+                href?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+    thanksTitle?: string | null;
+    thanks?:
+      | {
+          name: string;
+          href?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    dedicationTitle?: string | null;
+    /**
+     * Leave empty to hide.
+     */
+    dedication?: string | null;
+    /**
+     * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+     */
+    seo?: {
+      /**
+       * Best at 50 to 60 characters. The site name is added after it.
+       */
+      title?: string | null;
+      /**
+       * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+       */
+      description?: string | null;
+      /**
+       * Share image, 1200 × 630. Empty uses a generated one with the title.
+       */
+      image?: (number | null) | Media;
+      noindex?: boolean | null;
+    };
+  };
+  colophon?: {
+    title?: string | null;
     intro?: string | null;
     rows?:
       | {
-          label: string;
-          value: string;
+          label?: string | null;
+          value?: string | null;
           id?: string | null;
         }[]
       | null;
@@ -1467,6 +1793,24 @@ export interface Chat {
   newChatLabel?: string | null;
   chatLabel?: string | null;
   mapLabel?: string | null;
+  /**
+   * How this page appears in Google, AI answers and link previews. Leave empty to use the page's own title and intro.
+   */
+  seo?: {
+    /**
+     * Best at 50 to 60 characters. The site name is added after it.
+     */
+    title?: string | null;
+    /**
+     * Best at 120 to 160 characters: a plain summary that answers what this page is about.
+     */
+    description?: string | null;
+    /**
+     * Share image, 1200 × 630. Empty uses a generated one with the title.
+     */
+    image?: (number | null) | Media;
+    noindex?: boolean | null;
+  };
   /**
    * List visitors' past questions in the sidebar and on the map. Hide any single conversation under Inbox → Conversations.
    */
@@ -1542,6 +1886,24 @@ export interface SiteSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
+  jobTitle?: T;
+  orgName?: T;
+  orgUrl?: T;
+  orgDescription?: T;
+  knowsAbout?:
+    | T
+    | {
+        topic?: T;
+        id?: T;
+      };
   tagline?: T;
   intro?: T;
   aboutHeading?: T;
@@ -1574,6 +1936,22 @@ export interface AboutSelect<T extends boolean = true> {
     | {
         text?: T;
         id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  faqTitle?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -1610,6 +1988,14 @@ export interface PagesSelect<T extends boolean = true> {
         nextLabel?: T;
         clientLabel?: T;
         relatedNotesLabel?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noindex?: T;
+            };
       };
   notes?:
     | T
@@ -1626,12 +2012,28 @@ export interface PagesSelect<T extends boolean = true> {
         allLabel?: T;
         nextLabel?: T;
         relatedLabel?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noindex?: T;
+            };
       };
   photos?:
     | T
     | {
         title?: T;
         intro?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noindex?: T;
+            };
       };
   about?:
     | T
@@ -1697,6 +2099,14 @@ export interface PagesSelect<T extends boolean = true> {
         startedChat?: T;
         emptyText?: T;
         sampleText?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noindex?: T;
+            };
       };
   clients?:
     | T
@@ -1704,6 +2114,14 @@ export interface PagesSelect<T extends boolean = true> {
         title?: T;
         intro?: T;
         visitLabel?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noindex?: T;
+            };
       };
   people?:
     | T
@@ -1711,6 +2129,55 @@ export interface PagesSelect<T extends boolean = true> {
         title?: T;
         intro?: T;
         projectsLabel?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noindex?: T;
+            };
+      };
+  credits?:
+    | T
+    | {
+        title?: T;
+        intro?: T;
+        rollLabel?: T;
+        pauseLabel?: T;
+        music?: T;
+        groups?:
+          | T
+          | {
+              title?: T;
+              rows?:
+                | T
+                | {
+                    role?: T;
+                    name?: T;
+                    href?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+        thanksTitle?: T;
+        thanks?:
+          | T
+          | {
+              name?: T;
+              href?: T;
+              id?: T;
+            };
+        dedicationTitle?: T;
+        dedication?: T;
+        seo?:
+          | T
+          | {
+              title?: T;
+              description?: T;
+              image?: T;
+              noindex?: T;
+            };
       };
   colophon?:
     | T
@@ -1748,6 +2215,14 @@ export interface ChatSelect<T extends boolean = true> {
   newChatLabel?: T;
   chatLabel?: T;
   mapLabel?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+        noindex?: T;
+      };
   showConversations?: T;
   ai?:
     | T

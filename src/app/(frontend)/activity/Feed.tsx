@@ -70,7 +70,7 @@ function Line({ a, t, now }: { a: ActivityItem; t: Pages["activity"]; now: numbe
         </div>
         {thumb && (
           <Link href={a.href || "#"} className="block h-14 w-10 shrink-0 overflow-hidden rounded-md bg-card md:h-[68px] md:w-12">
-            <Visual media={a.thumb ? { url: a.thumb, alt: "", video: a.target === "video" } : null} cover={(a.cover || "graph") as Cover} className="h-full w-full" />
+            <Visual media={a.thumb ? { url: a.thumb, alt: "", video: a.target === "video" } : null} cover={(a.cover || "graph") as Cover} sizes="64px" className="h-full w-full" />
           </Link>
         )}
       </div>
