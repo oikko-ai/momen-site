@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowUp, MapIcon, MessageCircle, PanelLeft, SquarePen } from "lucide-react";
 import { Fragment, useEffect, useRef, useState } from "react";
 import type { ChatSettings } from "@/lib/cms";
 import { placeName, shortDate, toConversation, type Conversation } from "@/lib/feed";
@@ -60,7 +61,7 @@ function Face({ owner }: { owner: Owner }) {
   );
 }
 
-export default function ChatApp({ settings: t, initial, owner, nav }: { settings: ChatSettings; initial: Conversation[]; owner: Owner; nav: { label: string; href: string }[] }) {
+export default function ChatApp({ settings: t, initial, owner, nav, sampleLabel }: { settings: ChatSettings; initial: Conversation[]; owner: Owner; nav: { label: string; href: string }[]; sampleLabel: string }) {
   const [list, setList] = useState(initial);
   const [current, setCurrent] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -178,7 +179,8 @@ export default function ChatApp({ settings: t, initial, owner, nav }: { settings
       >
         <div className="flex items-center justify-between px-5 pb-4 pt-6">
           <h1 className="text-h3">{t.conversationsTitle}</h1>
-          <button onClick={() => open(null)} className="whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-micro text-soft transition-colors hover:border-white/30 hover:text-ink">
+          <button onClick={() => open(null)} className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-white/10 px-3 py-1.5 text-micro text-soft transition-colors hover:border-white/30 hover:text-ink">
+            <SquarePen className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />
             {t.newChatLabel}
           </button>
         </div>
@@ -191,7 +193,7 @@ export default function ChatApp({ settings: t, initial, owner, nav }: { settings
               >
                 <span className="flex items-center gap-2 text-micro text-soft">
                   <span className="truncate">{[shortDate(c.at), placeName(c, true)].filter(Boolean).join(" · ")}</span>
-                  {c.demo && <span className="eyebrow shrink-0 text-[10px]">Sample</span>}
+                  {c.demo && <span className="eyebrow shrink-0 text-[10px]">{sampleLabel}</span>}
                   {mine.includes(c.id) && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#4f8cff]" />}
                 </span>
                 <span className="mt-1 block truncate text-body">{c.title}</span>
@@ -210,10 +212,7 @@ export default function ChatApp({ settings: t, initial, owner, nav }: { settings
             aria-expanded={side}
             className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-soft transition-colors hover:border-white/30 hover:text-ink"
           >
-            <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <rect x="3.5" y="4.5" width="17" height="15" rx="3" />
-              <path d="M9.5 4.5v15" />
-            </svg>
+            <PanelLeft className="h-[18px] w-[18px]" strokeWidth={1.6} aria-hidden />
           </button>
           <div className="flex rounded-full border border-white/10 bg-white/[0.03] p-1" role="tablist">
             {(["chat", "map"] as const).map((v) => (
@@ -222,8 +221,9 @@ export default function ChatApp({ settings: t, initial, owner, nav }: { settings
                 role="tab"
                 aria-selected={view === v}
                 onClick={() => setView(v)}
-                className={`rounded-full px-4 py-1.5 text-micro transition-colors duration-300 ${view === v ? "bg-white/10 text-ink" : "text-soft hover:text-ink"}`}
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-micro transition-colors duration-300 ${view === v ? "bg-white/10 text-ink" : "text-soft hover:text-ink"}`}
               >
+                {v === "chat" ? <MessageCircle className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden /> : <MapIcon className="h-3.5 w-3.5" strokeWidth={1.75} aria-hidden />}
                 {v === "chat" ? t.chatLabel : t.mapLabel}
               </button>
             ))}
@@ -326,9 +326,7 @@ export default function ChatApp({ settings: t, initial, owner, nav }: { settings
                   aria-label="Send"
                   className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-ink text-paper transition-all duration-300 disabled:scale-90 disabled:opacity-30"
                 >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 19V5M5 12l7-7 7 7" />
-                  </svg>
+                  <ArrowUp className="h-[18px] w-[18px]" strokeWidth={2.2} aria-hidden />
                 </button>
               </div>
               {t.disclosure && <p className="mt-3 text-center text-micro text-faint">{t.disclosure}</p>}

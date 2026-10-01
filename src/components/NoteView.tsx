@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { RichText, type JSXConvertersFunction } from "@payloadcms/richtext-lexical/react";
 import { getNotes, getPages, getProjects, getSite, linked, media as toMedia, type MediaDoc } from "@/lib/cms";
@@ -61,7 +62,7 @@ export default async function NoteView({ slug }: { slug: string }) {
       </header>
       {n.cover && <Visual media={n.cover} cover="graph" className="rise mx-auto mb-block aspect-[16/9] max-w-[1000px] rounded-2xl" />}
       <div className="rise mx-auto max-w-read" style={{ ["--i" as string]: 4 }}>
-        <NoteReader id={n.id} likes={n.likes} views={n.views} highlights={n.highlights}>
+        <NoteReader id={n.id} likes={n.likes} views={n.views} highlights={n.highlights} labels={pages.labels}>
           {n.body ? <RichText data={n.body as never} converters={converters} disableContainer /> : null}
         </NoteReader>
       </div>
@@ -88,15 +89,15 @@ export default async function NoteView({ slug }: { slug: string }) {
         </section>
       )}
       <div className="mx-auto mt-block max-w-[1000px]">
-        <Subscribe wide email={site.email} title={p.signupTitle} text={p.signupText} doneText={p.signedUpText} />
+        <Subscribe wide email={site.email} title={p.signupTitle} text={p.signupText} doneText={p.signedUpText} placeholder={p.signupPlaceholder} button={p.signupButton} />
       </div>
       <nav className="mx-auto mt-12 flex max-w-[1000px] items-center justify-between text-body">
         <Link href="/notes" className="group flex items-center gap-2 text-soft transition-colors hover:text-ink">
-          <span className="transition-transform duration-300 group-hover:-translate-x-1">←</span> {p.allLabel}
+          <ArrowLeft className="transition-transform duration-300 group-hover:-translate-x-1" size="1em" strokeWidth={1.75} aria-hidden /> {p.allLabel}
         </Link>
         {next && next.slug !== n.slug && (
           <Link href={`/notes/${next.slug}`} className="group flex items-center gap-2 text-soft transition-colors hover:text-ink" title={next.title}>
-            {p.nextLabel} <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            {p.nextLabel} <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size="1em" strokeWidth={1.75} aria-hidden />
           </Link>
         )}
       </nav>

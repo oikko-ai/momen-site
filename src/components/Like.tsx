@@ -1,5 +1,6 @@
 "use client";
 
+import { Heart } from "lucide-react";
 import { useSyncExternalStore } from "react";
 import { visitorId } from "@/lib/visitor";
 
@@ -47,13 +48,11 @@ export default function Like({ id, count, target }: { id: string; count: number;
       onClick={toggle}
       aria-pressed={liked}
       aria-label={liked ? "Unlike" : "Like"}
-      className={`absolute bottom-3 left-3 z-10 flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-micro text-white backdrop-blur-md transition-opacity duration-300 focus-visible:opacity-100 group-hover/m:opacity-100 ${
-        liked ? "opacity-100" : "opacity-0"
+      className={`absolute bottom-3 left-3 z-10 flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-micro text-white backdrop-blur-md transition-opacity duration-300 focus-visible:opacity-100 ${
+        liked ? "opacity-100" : "opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/m:opacity-100"
       }`}
     >
-      <svg viewBox="0 0 24 24" className={`h-3.5 w-3.5 transition-transform duration-300 ${liked ? "scale-110 fill-[#ff4d6d] stroke-[#ff4d6d]" : "fill-none stroke-white"}`} strokeWidth="2">
-        <path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 5 6.6 5c2 0 3.4 1.1 4.1 2.4h2.6C14 6.1 15.4 5 17.4 5c3.4 0 5.3 3.4 3.8 6.4C19 15.6 12 20 12 20z" />
-      </svg>
+      <Heart className={`h-3.5 w-3.5 transition-transform duration-300 ${liked ? "scale-110 fill-[#ff4d6d] text-[#ff4d6d]" : ""}`} strokeWidth={2} aria-hidden />
       {n > 0 && <span>{n}</span>}
     </button>
   );

@@ -5,23 +5,24 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Reveal from "@/components/Reveal";
 import HideOn from "@/components/HideOn";
-import { getSite } from "@/lib/cms";
+import { getPages, getSite } from "@/lib/cms";
+import { siteUrl } from "@/lib/url";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const site = await getSite();
-  return { title: { default: site.name, template: `%s · ${site.name}` }, description: site.intro };
+  return { metadataBase: new URL(siteUrl), title: { default: site.name, template: `%s · ${site.name}` }, description: site.intro, openGraph: { siteName: site.name, type: "website" } };
 }
 
 export const viewport: Viewport = { themeColor: "#050505" };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const site = await getSite();
+  const [site, pages] = await Promise.all([getSite(), getPages()]);
   return (
     <html lang="en" className={`${GeistMono.variable} antialiased`}>
       <body className="flex min-h-screen flex-col">
         <HideOn prefix="/chat">
-          <Header name={site.name} available={site.available ? site.availableText : undefined} />
+          <Header name={site.name} available={site.available ? site.availableText : undefined} menu={site.menu} moreLabel={pages.labels.moreLabel} menuLabel={pages.labels.menuLabel} />
         </HideOn>
         <Reveal />
         <main className="flex-1">{children}</main>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Heart, Highlighter, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Cover } from "@/content";
 import type { Pages } from "@/lib/cms";
@@ -9,31 +10,29 @@ import Visual from "@/components/Visual";
 
 const WEEK = 7 * 86_400_000;
 
+// One clear symbol per kind of activity, on a soft tint of its colour.
 const icons = {
-  like: (
-    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-[#ff3b5c]">
-      <path d="M12 20.5s-7.5-4.6-9.7-9.1C.7 8.1 2.8 4.5 6.5 4.5c2.1 0 3.7 1.2 4.5 2.6h2c.8-1.4 2.4-2.6 4.5-2.6 3.7 0 5.8 3.6 4.2 6.9-2.2 4.5-9.7 9.1-9.7 9.1z" />
-    </svg>
-  ),
-  highlight: (
-    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" stroke="#ffd166" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 11l-5 5v3h3l5-5M9 11l6-6 4 4-6 6M9 11l4 4" />
-    </svg>
-  ),
-  chat: (
-    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] fill-[#4f8cff]">
-      <path d="M12 3.5c5 0 9 3.4 9 7.6s-4 7.6-9 7.6c-1 0-2-.1-2.9-.4L4.5 20l1.2-3.6C4 15 3 13.1 3 11.1 3 6.9 7 3.5 12 3.5z" />
-    </svg>
-  ),
+  like: { Icon: Heart, tone: "bg-[#ff3b5c]/12 text-[#ff3b5c]", fill: true },
+  highlight: { Icon: Highlighter, tone: "bg-[#ffd166]/12 text-[#ffd166]", fill: false },
+  chat: { Icon: MessageCircle, tone: "bg-[#4f8cff]/12 text-[#4f8cff]", fill: true },
 };
+
+function Badge({ kind }: { kind: keyof typeof icons }) {
+  const { Icon, tone, fill } = icons[kind];
+  return (
+    <span className={`grid h-8 w-8 place-items-center rounded-full md:h-9 md:w-9 ${tone}`}>
+      <Icon className={`h-4 w-4 ${fill ? "fill-current" : ""}`} strokeWidth={fill ? 1.5 : 2} aria-hidden />
+    </span>
+  );
+}
 
 function Line({ a, t, now }: { a: ActivityItem; t: Pages["activity"]; now: number | null }) {
   const place = placeName(a);
   const verb = a.kind === "chat" ? t.startedChat : a.kind === "highlight" ? t.highlighted : a.target === "note" ? t.likedNote : a.target === "video" ? t.likedVideo : t.likedImage;
   const thumb = a.target === "image" || a.target === "video";
   return (
-    <li className="grid grid-cols-[28px_minmax(0,1fr)] gap-x-4 md:grid-cols-[36px_minmax(0,1fr)]">
-      <span className="pt-[5px]">{icons[a.kind]}</span>
+    <li className="grid grid-cols-[32px_minmax(0,1fr)] gap-x-4 md:grid-cols-[36px_minmax(0,1fr)]">
+      <Badge kind={a.kind} />
       <div className="flex items-start justify-between gap-6 border-b border-rule pb-5 pt-0.5">
         <div className="min-w-0 text-body">
           <p>

@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { CollectionConfig, Endpoint, GlobalConfig, Payload } from "payload";
 import { plainText } from "./notes";
 import { refreshSite } from "./revalidate";
+import { costOf, DEFAULT_MODEL, models, record, spent, type Model, type Usage } from "./usage";
 import { allow, editorsOnly, ipOf, logActivity, placeOf, publicUnlessHidden, visitorHash } from "./visitors";
 
 const MAX_MESSAGE = 1000;
@@ -39,10 +40,65 @@ export const Chat: GlobalConfig = {
           ],
         },
         {
+          label: "AI & billing",
+          description: "Which Claude model answers, and how much it may spend. Costs are tracked under Inbox → AI usage. When a limit is reached, visitors see the offline text with your email instead.",
+          fields: [
+            {
+              name: "ai",
+              type: "group",
+              label: false,
+              access: { read: editorsOnly },
+              fields: [
+                { name: "enabled", type: "checkbox", label: "Answer with AI", defaultValue: true, admin: { description: "Off: every question gets the offline text, and nothing is spent." } },
+                {
+                  type: "row",
+                  fields: [
+                    { name: "model", type: "select", defaultValue: DEFAULT_MODEL, required: true, options: Object.entries(models).map(([value, m]) => ({ value, label: m.label })), admin: { width: "60%" } },
+                    {
+                      name: "effort",
+                      type: "select",
+                      defaultValue: "low",
+                      required: true,
+                      options: [
+                        { value: "low", label: "Low (fast, cheapest)" },
+                        { value: "medium", label: "Medium" },
+                        { value: "high", label: "High (slower, costs more)" },
+                      ],
+                      admin: { width: "40%", description: "How much the model thinks before answering. Not used by Haiku." },
+                    },
+                  ],
+                },
+                {
+                  type: "row",
+                  fields: [
+                    { name: "maxTokens", type: "number", label: "Longest answer (tokens)", defaultValue: 1200, min: 200, max: 8000, required: true, admin: { width: "33%", description: "About 0.75 words per token, thinking included." } },
+                    { name: "monthlyBudget", type: "number", label: "Monthly budget (USD)", defaultValue: 20, min: 0, admin: { width: "33%", description: "Chat stops answering with AI once this month's cost reaches it. Empty means no monthly cap." } },
+                    { name: "credit", type: "number", label: "Credit (USD)", min: 0, admin: { width: "33%", description: "Optional. Total you've set aside for the chat, across all months. Empty means unlimited." } },
+                  ],
+                },
+                {
+                  type: "row",
+                  fields: [
+                    { name: "dailyPerVisitor", type: "number", label: "Questions per visitor per day", defaultValue: 30, min: 1, required: true, admin: { width: "33%" } },
+                    { name: "limitText", type: "textarea", label: "Daily limit reached text", admin: { width: "67%" } },
+                  ],
+                },
+                {
+                  type: "row",
+                  fields: [
+                    { name: "spentThisMonth", type: "number", label: "Spent this month (USD)", virtual: true, admin: { readOnly: true, width: "33%" }, hooks: { afterRead: [async ({ req }) => (req.user ? (await spent(req.payload)).month : undefined)] } },
+                    { name: "spentTotal", type: "number", label: "Spent in total (USD)", virtual: true, admin: { readOnly: true, width: "33%" }, hooks: { afterRead: [async ({ req }) => (req.user ? (await spent(req.payload)).total : undefined)] } },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        {
           label: "Answers",
           fields: [
-            { name: "instructions", type: "textarea", admin: { description: "How the assistant should answer: voice, length, what to say about pricing or availability." } },
-            { name: "facts", type: "textarea", admin: { description: "Extra facts the site doesn't show, e.g. how you like to work, rates, time zone. Everything else on the site is included automatically." } },
+            { name: "instructions", type: "textarea", access: { read: editorsOnly }, admin: { description: "How the assistant should answer: voice, length, what to say about pricing or availability." } },
+            { name: "facts", type: "textarea", access: { read: editorsOnly }, admin: { description: "Extra facts the site doesn't show, e.g. how you like to work, rates, time zone. Everything else on the site is included automatically." } },
           ],
         },
       ],
@@ -80,6 +136,19 @@ export const Conversations: CollectionConfig = {
       fields: [
         { name: "lat", type: "number", admin: { width: "50%" } },
         { name: "lon", type: "number", admin: { width: "50%" } },
+      ],
+    },
+    {
+      name: "usage",
+      type: "group",
+      label: "AI usage",
+      access: { read: editorsOnly },
+      admin: { position: "sidebar", readOnly: true },
+      fields: [
+        { name: "model", type: "text" },
+        { name: "inputTokens", type: "number", defaultValue: 0 },
+        { name: "outputTokens", type: "number", defaultValue: 0 },
+        { name: "cost", type: "number", label: "Cost (USD)", defaultValue: 0 },
       ],
     },
     { name: "hidden", type: "checkbox", admin: { position: "sidebar", description: "Remove from the public sidebar and map." } },
@@ -130,7 +199,7 @@ const reply = (text: string, id: string | number) =>
 
 // POST /api/conversations/send  { id?, message, visitor }
 // Saves the visitor's message, streams the answer back as plain text, then saves the answer.
-export const send: Endpoint = {
+const send: Endpoint = {
   path: "/send",
   method: "post",
   handler: async (req) => {
@@ -142,6 +211,8 @@ export const send: Endpoint = {
     if (!allow(`chat:${ipOf(req)}`, 20, 10 * 60_000)) return Response.json({ error: "That's a lot of questions. Please wait a few minutes." }, { status: 429 });
 
     const { payload } = req;
+    const chat = (await payload.findGlobal({ slug: "chat", depth: 0 })) as unknown as Doc;
+    const ai = (chat.ai ?? {}) as { enabled?: boolean; model?: Model; effort?: "low" | "medium" | "high"; maxTokens?: number; monthlyBudget?: number | null; credit?: number | null; dailyPerVisitor?: number; limitText?: string };
     let convo: Doc | null = null;
     if (body.id) {
       convo = (await payload.findByID({ collection: "conversations", id: body.id, depth: 0, overrideAccess: true }).catch(() => null)) as Doc | null;
@@ -149,10 +220,22 @@ export const send: Endpoint = {
     }
     const history = ((convo?.messages as { role: string; text: string }[]) ?? []).map(({ role, text }) => ({ role, text }));
     if (history.length >= MAX_TURNS) return Response.json({ error: "This chat is full. Start a new one." }, { status: 400 });
-    history.push({ role: "visitor", text: message });
 
-    const save = (messages: typeof history) =>
-      payload.update({ collection: "conversations", id: convo!.id as number, data: { messages } as never, depth: 0, context: { skipRefresh: true } });
+    // Questions this visitor asked in chats started during the last day.
+    const { docs: recent } = await payload.find({
+      collection: "conversations",
+      where: { and: [{ visitor: { equals: visitor } }, { createdAt: { greater_than: new Date(Date.now() - 86_400_000).toISOString() } }] },
+      limit: 100,
+      depth: 0,
+      overrideAccess: true,
+    });
+    const asked = recent.reduce((t, c) => t + (((c as unknown as Doc).messages as { role: string }[]) ?? []).filter((m) => m.role === "visitor").length, 0);
+    if (asked >= (ai.dailyPerVisitor ?? 30))
+      return Response.json({ error: s(ai.limitText) || "You've reached today's question limit. Please email me instead." }, { status: 429 });
+
+    history.push({ role: "visitor", text: message });
+    const save = (messages: typeof history, usage?: Doc) =>
+      payload.update({ collection: "conversations", id: convo!.id as number, data: { messages, ...(usage && { usage }) } as never, depth: 0, context: { skipRefresh: true } });
     if (!convo) {
       const place = placeOf(req);
       convo = (await payload.create({
@@ -163,27 +246,35 @@ export const send: Endpoint = {
       })) as unknown as Doc;
       await logActivity(payload, req, visitor, { kind: "chat", target: "chat", title: message.slice(0, 140), href: `/chat?c=${convo.id}` });
     } else await save(history);
+    const id = convo.id as number;
+    const offline = s(chat.offlineText) || "Chat isn't connected yet.";
 
-    const chat = (await payload.findGlobal({ slug: "chat" })) as unknown as Doc;
+    // No key, switched off, or over budget: answer with the offline text, which points to email.
     const key = process.env.ANTHROPIC_API_KEY;
-    if (!key) {
-      const text = s(chat.offlineText) || "Chat isn't connected yet.";
-      await save([...history, { role: "assistant", text }]);
-      return reply(text, convo.id as number);
+    const cost = await spent(payload);
+    const over = (ai.monthlyBudget != null && cost.month >= ai.monthlyBudget) || (ai.credit != null && cost.total >= ai.credit);
+    if (!key || ai.enabled === false || over) {
+      if (over) payload.logger.warn("Chat budget reached; answering with the offline text.");
+      await save([...history, { role: "assistant", text: offline }]);
+      return reply(offline, id);
     }
 
+    const model: Model = ai.model && ai.model in models ? ai.model : DEFAULT_MODEL;
     const client = new Anthropic({ apiKey: key });
     const stream = client.messages.stream({
-      model: process.env.CHAT_MODEL || "claude-sonnet-5-5",
-      max_tokens: 700,
-      system: await briefing(payload),
+      model,
+      max_tokens: ai.maxTokens ?? 1200,
+      ...(model !== "claude-haiku-4-5" && { output_config: { effort: ai.effort ?? "low" } }),
+      // The briefing is the same for every visitor, so it is cached and later questions cost far less.
+      system: [{ type: "text", text: await briefing(payload), cache_control: { type: "ephemeral" } }],
       messages: history.map((m) => ({ role: m.role === "visitor" ? ("user" as const) : ("assistant" as const), content: m.text })),
     });
-    const id = convo.id as number;
+    const prior = (convo.usage ?? {}) as { inputTokens?: number; outputTokens?: number; cost?: number };
     const encoder = new TextEncoder();
     let answer = "";
     const body$ = new ReadableStream<Uint8Array>({
       async start(controller) {
+        let usage: Doc | undefined;
         try {
           for await (const event of stream) {
             if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
@@ -191,14 +282,25 @@ export const send: Endpoint = {
               controller.enqueue(encoder.encode(event.delta.text));
             }
           }
+          const final = await stream.finalMessage();
+          const u = final.usage as Usage;
+          const usd = costOf(model, u);
+          await record(payload, u, usd);
+          usage = {
+            model,
+            inputTokens: (prior.inputTokens ?? 0) + u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
+            outputTokens: (prior.outputTokens ?? 0) + u.output_tokens,
+            cost: Math.round(((prior.cost ?? 0) + usd) * 1e6) / 1e6,
+          };
         } catch (err) {
           payload.logger.error({ err }, "Chat answer failed");
-          if (!answer) {
-            answer = s(chat.offlineText) || "Sorry, something went wrong. Please try again.";
-            controller.enqueue(encoder.encode(answer));
-          }
         }
-        await save([...history, { role: "assistant", text: answer.trim() }]).catch(() => null);
+        // Nothing came back (an error, or the model declined): fall back to the offline text.
+        if (!answer.trim()) {
+          answer = offline;
+          controller.enqueue(encoder.encode(answer));
+        }
+        await save([...history, { role: "assistant", text: answer.trim() }], usage).catch(() => null);
         controller.close();
       },
       cancel() {

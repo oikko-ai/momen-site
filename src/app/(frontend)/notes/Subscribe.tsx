@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
-type Props = { email: string; title: string; text: string; doneText: string; rss?: string; rssLabel?: string; wide?: boolean };
+type Props = { email: string; title: string; text: string; doneText: string; placeholder: string; button: string; rss?: string; rssLabel?: string; wide?: boolean };
 
 // Signups are saved to Subscribers in the CMS. Where the CMS isn't reachable (the static preview), it drafts an email instead.
-export default function Subscribe({ email: to, title, text, doneText, rss, rssLabel, wide = false }: Props) {
+export default function Subscribe({ email: to, title, text, doneText, placeholder, button, rss, rssLabel, wide = false }: Props) {
   const [email, setEmail] = useState("");
   const [state, setState] = useState<"idle" | "sending" | "done">("idle");
   const submit = async (e: React.FormEvent) => {
@@ -16,7 +16,7 @@ export default function Subscribe({ email: to, title, text, doneText, rss, rssLa
       (await fetch("/api/subscribers", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email }) })
         .then((r) => r.ok || r.status === 400)
         .catch(() => false));
-    if (!ok) location.href = `mailto:${to}?subject=${encodeURIComponent("Add me to your notes list")}&body=${encodeURIComponent(email)}`;
+    if (!ok) location.href = `mailto:${to}?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(email)}`;
     setState("done");
   };
   const form = (
@@ -26,12 +26,12 @@ export default function Subscribe({ email: to, title, text, doneText, rss, rssLa
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
-        aria-label="Email"
+        placeholder={placeholder}
+        aria-label={placeholder}
         className="min-w-0 flex-1 rounded-lg bg-white/[0.06] px-4 py-3 text-small outline-none placeholder:text-faint focus:bg-white/10"
       />
       <button disabled={state === "sending"} className="rounded-full bg-ink px-5 py-3 text-small text-paper transition-transform active:scale-95 disabled:opacity-60">
-        Sign up
+        {button}
       </button>
     </form>
   );

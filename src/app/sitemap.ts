@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 import { getNotes, getProjects } from "@/lib/cms";
+import { siteUrl as site } from "@/lib/url";
 
 export const dynamic = "force-static";
 
-const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 // Every page, case study and note, for search engines. Refreshed whenever the CMS changes.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

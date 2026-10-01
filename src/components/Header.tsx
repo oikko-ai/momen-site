@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { moreNav, nav } from "@/content";
+import { Menu, X } from "lucide-react";
 import { useRoute } from "./useRoute";
 import Available from "./Available";
 
-export default function Header({ name, available }: { name: string; available?: string }) {
+type Item = { label: string; href: string; more: boolean };
+
+export default function Header({ name, available, menu, moreLabel, menuLabel }: { name: string; available?: string; menu: Item[]; moreLabel: string; menuLabel: string }) {
+  const bar = menu.filter((n) => !n.more);
+  const more = menu.filter((n) => n.more);
+  // On phones the bar keeps two links; the others move into More.
+  const phone = new Set(bar.filter((n) => n.href !== "/").slice(0, 2).map((n) => n.href));
   const pathname = useRoute(usePathname());
   const [open, setOpen] = useState(false);
   const [float, setFloat] = useState(false);
@@ -73,23 +79,23 @@ export default function Header({ name, available }: { name: string; available?: 
           )}
         </div>
         <div ref={box} className="relative flex items-center gap-5 text-body md:gap-8">
-          {nav.map((n) => (
-            <Link key={n.href} href={n.href} className={`${link(n.href)} ${n.href === "/" || n.href === "/notes" ? "hidden sm:inline" : ""}`}>
+          {bar.map((n) => (
+            <Link key={n.href} href={n.href} className={`${link(n.href)} ${phone.has(n.href) ? "" : "hidden sm:inline"}`}>
               {n.label}
             </Link>
           ))}
           <button onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-haspopup="menu" className={open ? "text-ink" : "text-soft hover:text-ink"}>
-            More
+            {moreLabel}
           </button>
           {open && (
             <div role="menu" className="pop absolute right-0 top-10 w-52 rounded-xl border border-rule bg-[#101010]/95 p-1.5 shadow-2xl backdrop-blur-xl">
-              {[...nav.filter((n) => n.href === "/" || n.href === "/notes"), ...moreNav].map((n) => (
+              {[...bar.filter((n) => !phone.has(n.href)), ...more].map((n) => (
                 <Link
                   key={n.href}
                   role="menuitem"
                   href={n.href}
                   className={`flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-small hover:bg-white/5 ${
-                    n.href === "/" || n.href === "/notes" ? "sm:hidden" : ""
+                    !n.more ? "sm:hidden" : ""
                   } ${pathname.startsWith(n.href) && n.href !== "/" ? "text-ink" : "text-soft hover:text-ink"}`}
                 >
                   <span className={`h-1 w-1 rounded-full ${pathname.startsWith(n.href) && n.href !== "/" ? "bg-ink" : "bg-transparent"}`} />
@@ -110,18 +116,15 @@ export default function Header({ name, available }: { name: string; available?: 
           onClick={() => setFloatOpen((o) => !o)}
           aria-expanded={floatOpen}
           aria-haspopup="menu"
-          aria-label="Menu"
+          aria-label={menuLabel}
           tabIndex={float ? 0 : -1}
           className="grid h-11 w-11 place-items-center rounded-full border border-white/10 bg-[#141414]/80 shadow-xl backdrop-blur-xl transition-colors hover:bg-[#222]"
         >
-          <span className="relative block h-2.5 w-4">
-            <span className={`absolute left-0 h-[1.5px] w-full rounded bg-ink transition-transform duration-300 ${floatOpen ? "top-1 rotate-45" : "top-0"}`} />
-            <span className={`absolute left-0 h-[1.5px] w-full rounded bg-ink transition-transform duration-300 ${floatOpen ? "top-1 -rotate-45" : "top-2"}`} />
-          </span>
+          {floatOpen ? <X className="pop h-[18px] w-[18px]" strokeWidth={1.75} /> : <Menu className="pop h-[18px] w-[18px]" strokeWidth={1.75} />}
         </button>
         {floatOpen && (
           <div role="menu" className="pop absolute right-0 top-14 w-56 rounded-2xl border border-rule bg-[#101010]/95 p-1.5 shadow-2xl backdrop-blur-xl">
-            {[...nav, ...moreNav].map((n) => {
+            {menu.map((n) => {
               const on = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
               return (
                 <Link key={n.href} role="menuitem" href={n.href} className={`flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-small hover:bg-white/5 ${on ? "text-ink" : "text-soft hover:text-ink"}`}>

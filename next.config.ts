@@ -6,6 +6,6 @@ const staticExport = process.env.STATIC_EXPORT === "1";
 
 const nextConfig: NextConfig = staticExport
   ? { output: "export", assetPrefix: ".", images: { unoptimized: true } }
-  : {};
+  : { experimental: { globalNotFound: true } };
 
 export default withPayload(nextConfig);

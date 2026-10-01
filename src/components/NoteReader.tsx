@@ -1,7 +1,9 @@
 "use client";
 
+import { Eye, Heart, Highlighter } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import type { Pages } from "@/lib/cms";
 import { visitorId } from "@/lib/visitor";
 
 type Highlight = { text: string; count: number };
@@ -10,6 +12,7 @@ type Props = {
   likes: number;
   views: number;
   highlights: Highlight[];
+  labels: Pages["labels"];
   children: React.ReactNode;
 };
 
@@ -87,6 +90,7 @@ export default function NoteReader({
   likes: likes0,
   views: views0,
   highlights: hl0,
+  labels: l,
   children,
 }: Props) {
   const body = useRef<HTMLDivElement>(null);
@@ -243,13 +247,7 @@ export default function NoteReader({
               aria-label="Like"
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-colors hover:bg-white/5 ${liked ? "text-ink" : ""}`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className={`h-4 w-4 transition-transform duration-300 ${liked ? "scale-110 fill-[#ff4d6d] stroke-[#ff4d6d]" : "fill-current stroke-current"}`}
-                strokeWidth="1.5"
-              >
-                <path d="M12 20s-7-4.4-9.2-8.6C1.3 8.4 3.2 5 6.6 5c2 0 3.4 1.1 4.1 2.4h2.6C14 6.1 15.4 5 17.4 5c3.4 0 5.3 3.4 3.8 6.4C19 15.6 12 20 12 20z" />
-              </svg>
+              <Heart className={`h-4 w-4 transition-transform duration-300 ${liked ? "scale-110 fill-[#ff4d6d] text-[#ff4d6d]" : ""}`} strokeWidth={1.75} aria-hidden />
               {likes}
             </button>
             <button
@@ -258,36 +256,21 @@ export default function NoteReader({
               aria-label="Highlights"
               className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 transition-colors hover:bg-white/5 ${open ? "bg-white/5 text-ink" : ""}`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4 fill-none stroke-current"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m14 4 6 6-8.5 8.5H6v-5.5L14 4zM4 21h16" />
-              </svg>
+              <Highlighter className="h-4 w-4" strokeWidth={1.75} aria-hidden />
               {total}
             </button>
             <span
               className="flex items-center gap-1.5 px-3 py-1.5"
               title="Views"
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-4 w-4 fill-none stroke-current"
-                strokeWidth="1.6"
-              >
-                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
+              <Eye className="h-4 w-4" strokeWidth={1.75} aria-hidden />
               {views}
             </span>
           </div>
           {open && (
             <div className="pop absolute bottom-[calc(100%+10px)] left-1/2 w-[300px] -translate-x-1/2 overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a]/95 shadow-2xl backdrop-blur-xl [transform-origin:bottom_center]">
               <div className="flex items-center justify-between border-b border-white/5 px-4 py-3 text-micro">
-                <span className="text-ink">Highlights</span>
+                <span className="text-ink">{l.highlightsTitle}</span>
                 <span className="flex gap-1">
                   {(["mine", "them"] as const).map((t) => (
                     <button
@@ -295,7 +278,7 @@ export default function NoteReader({
                       onClick={() => setTab(t)}
                       className={`rounded-full px-2.5 py-1 transition-colors ${tab === t ? "bg-white/10 text-ink" : "text-soft hover:text-ink"}`}
                     >
-                      {t === "mine" ? "You" : "Others"}{" "}
+                      {t === "mine" ? l.youLabel : l.othersLabel}{" "}
                       <span className="text-faint">
                         {t === "mine" ? mine.length : them.length}
                       </span>
@@ -307,8 +290,8 @@ export default function NoteReader({
                 {list.length === 0 && (
                   <li className="px-3 py-4 text-micro leading-relaxed text-soft">
                     {tab === "mine"
-                      ? "Select any sentence in the note to highlight it."
-                      : "No highlights yet."}
+                      ? l.highlightsHint
+                      : l.highlightsEmpty}
                   </li>
                 )}
                 {list.map((h) => (

@@ -2,12 +2,12 @@ import type { Person } from "@/lib/cms";
 import Face from "./Avatar";
 
 // A person's photo, or their placeholder monogram.
-export function Avatar({ person, className = "" }: { person: Person; className?: string }) {
+function Avatar({ person, className = "" }: { person: Person; className?: string }) {
   return <Face name={person.name} image={person.avatar} className={className} />;
 }
 
 // Team avatars; hovering or focusing one lifts it and opens that person's card.
-export default function Team({ people }: { people: Person[] }) {
+export default function Team({ people, viewProfile }: { people: Person[]; viewProfile: string }) {
   return (
     <ul className="relative flex flex-wrap gap-1.5">
       {people.map((p) => {
@@ -33,7 +33,7 @@ export default function Team({ people }: { people: Person[] }) {
                 </span>
               </span>
               {p.bio && <span className="mt-2.5 block text-micro leading-relaxed text-soft">{p.bio}</span>}
-              {p.href && <span className="eyebrow mt-2 block">View profile ↗</span>}
+              {p.href && <span className="eyebrow mt-2 block">{viewProfile} ↗</span>}
             </span>
           </li>
         );

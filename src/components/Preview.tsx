@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-export const ROUTE_EVENT = "preview-route";
+const ROUTE_EVENT = "preview-route";
 
 // Single-page preview: every route is already in the document; show the one named by the hash.
 export default function Preview() {

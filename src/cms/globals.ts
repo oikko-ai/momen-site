@@ -1,6 +1,20 @@
 import type { ArrayField, GlobalConfig } from "payload";
 import { refreshSite } from "./revalidate";
 import { Chat } from "./chat";
+import { pages as start } from "../content";
+
+// Links must be a page on this site (/about) or a full web address.
+const link = (v: unknown) => (typeof v !== "string" || !v ? true : /^(\/|https?:\/\/|mailto:)/.test(v) || "Start with / for a page here, or https:// for another site.");
+
+// A group of short text fields, one per key of the starting text, so every label on the site is editable.
+const labels = (name: keyof typeof start, label: string, description?: string) =>
+  ({
+    name,
+    label,
+    type: "group",
+    admin: { description },
+    fields: Object.keys(start[name]).map((k) => ({ name: k, type: k === "messagePlaceholder" ? "textarea" : "text" })),
+  }) as GlobalConfig["fields"][number];
 
 const paragraphs = (name: string, label: string): ArrayField => ({
   name,
@@ -27,12 +41,53 @@ export const Site: GlobalConfig = {
             { name: "email", type: "email", required: true },
             { name: "city", type: "text" },
             { name: "portrait", type: "upload", relationTo: "media", admin: { description: "Shown on Home and About." } },
-            { name: "socials", type: "array", fields: [{ name: "label", type: "text", required: true }, { name: "href", type: "text", required: true }] },
+            {
+              name: "socials",
+              type: "array",
+              admin: { description: "Shown as icons in the footer. LinkedIn, GitHub, X, Instagram, YouTube and others get their own logo." },
+              fields: [{ type: "row", fields: [{ name: "label", type: "text", required: true, admin: { width: "35%" } }, { name: "href", type: "text", required: true, validate: link, admin: { width: "65%" } }] }],
+            },
             {
               type: "row",
               fields: [
                 { name: "available", type: "checkbox", label: "Show availability badge", admin: { width: "40%", description: "A small green dot with the text beside it, in the header and on Home." } },
                 { name: "availableText", type: "text", label: "Availability text", admin: { width: "60%" } },
+              ],
+            },
+          ],
+        },
+        {
+          label: "Menu & footer",
+          fields: [
+            {
+              name: "menu",
+              type: "array",
+              labels: { singular: "Link", plural: "Header menu" },
+              admin: { description: "Leave empty to use the default menu. Tick \"Under More\" to tuck a link into the More list.", initCollapsed: true },
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    { name: "label", type: "text", required: true, admin: { width: "35%" } },
+                    { name: "href", type: "text", required: true, validate: link, admin: { width: "45%", description: "/about or https://…" } },
+                    { name: "more", type: "checkbox", label: "Under More", admin: { width: "20%" } },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "footerLinks",
+              type: "array",
+              labels: { singular: "Link", plural: "Footer links" },
+              admin: { description: "Small links at the bottom right of every page. Your email and the socials above show as icons.", initCollapsed: true },
+              fields: [
+                {
+                  type: "row",
+                  fields: [
+                    { name: "label", type: "text", required: true, admin: { width: "50%" } },
+                    { name: "href", type: "text", required: true, validate: link, admin: { width: "50%" } },
+                  ],
+                },
               ],
             },
           ],
@@ -124,6 +179,7 @@ export const Pages: GlobalConfig = {
               { name: "signupTitle", type: "text" },
               { name: "signupText", type: "textarea" },
               { name: "rssLabel", type: "text", defaultValue: "Subscribe via RSS", admin: { description: "Link to the RSS feed under the signup card." } },
+              { type: "row", fields: [{ name: "signupPlaceholder", type: "text", admin: { width: "50%" } }, { name: "signupButton", type: "text", admin: { width: "50%" } }] },
               { name: "signedUpText", type: "text", defaultValue: "Thanks, you're on the list." },
               { name: "allLabel", type: "text", defaultValue: "All notes" },
               { name: "nextLabel", type: "text", defaultValue: "Next note" },
@@ -132,6 +188,9 @@ export const Pages: GlobalConfig = {
           ],
         },
         { label: "Photos", fields: [pageText("photos", "Photos page")] },
+        { label: "About", fields: [labels("about", "About page", "Section titles on the About page. The heading and text are under About page.")] },
+        { label: "Contact form", fields: [labels("contact", "Contact form", "Write {email} where the sender's address should go.")] },
+        { label: "Labels", fields: [labels("labels", "Small labels", "Buttons and badges used across the site.")] },
         {
           label: "Activity",
           fields: [

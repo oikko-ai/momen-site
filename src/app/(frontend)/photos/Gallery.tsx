@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Media } from "@/lib/cms";
 
@@ -48,7 +49,7 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
             <Tile p={photos[open]} i={open} big />
           </div>
           <button className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-white/10 text-ink" onClick={() => setOpen(null)} aria-label="Close">
-            ×
+            <X className="h-[18px] w-[18px]" strokeWidth={1.75} />
           </button>
           {[-1, 1].map((d) => (
             <button
@@ -60,7 +61,7 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
               }}
               className={`absolute top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-full bg-white/10 text-ink ${d < 0 ? "left-4" : "right-4"}`}
             >
-              {d < 0 ? "←" : "→"}
+              {d < 0 ? <ArrowLeft className="h-[18px] w-[18px]" strokeWidth={1.75} /> : <ArrowRight className="h-[18px] w-[18px]" strokeWidth={1.75} />}
             </button>
           ))}
         </div>

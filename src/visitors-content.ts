@@ -2,12 +2,23 @@
 // Samples are flagged in the CMS and labelled on the site. Delete them once real visitors arrive.
 import { me } from "./content";
 
+// Starting AI settings: Claude Opus 5.5 at low effort, capped at $20 a month and 30 questions per visitor per day.
+export const ai = {
+  enabled: true,
+  model: "claude-opus-5-5",
+  effort: "low",
+  maxTokens: 1200,
+  monthlyBudget: 20,
+  dailyPerVisitor: 30,
+  limitText: `You've asked a lot today, thank you. For anything more, email me at ${me.email}.`,
+};
+
 export const chat = {
   greeting: "Hi there. Ask me anything about my work.",
   suggestions: ["What do you build?", "Can you help an enterprise team ship AI?", "What is Oikko AI?", "How do you start a new project?"].map((text) => ({ text })),
   placeholder: "Message…",
   disclosure: "Answers are written by AI from what's on this site and can be wrong. Chats are saved and listed here without names, with a rough location.",
-  offlineText: `Thanks for asking. AI answers aren't switched on yet, so please email me at ${me.email} and I'll reply myself.`,
+  offlineText: `Thanks for asking. AI answers aren't available right now, so please email me at ${me.email} and I'll reply myself.`,
   conversationsTitle: "Conversations",
   newChatLabel: "New chat",
   chatLabel: "Chat",

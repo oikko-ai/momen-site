@@ -18,18 +18,20 @@ export const me = {
   ],
 };
 
-export const nav = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Work", href: "/work" },
-  { label: "Notes", href: "/notes" },
+// Header menu. Items marked "more" sit under the More button; the rest show in the bar.
+export const menu = [
+  { label: "Home", href: "/", more: false },
+  { label: "About", href: "/about", more: false },
+  { label: "Work", href: "/work", more: false },
+  { label: "Notes", href: "/notes", more: false },
+  { label: "Photos", href: "/photos", more: true },
+  { label: "Clients", href: "/clients", more: true },
+  { label: "People", href: "/people", more: true },
+  { label: "Colophon", href: "/colophon", more: true },
 ];
-
-// Tucked under "More" in the header.
-export const moreNav = [
-  { label: "Photos", href: "/photos" },
-  { label: "Clients", href: "/clients" },
-  { label: "People", href: "/people" },
+export const footerLinks = [
+  { label: "Activity", href: "/activity" },
+  { label: "Chat", href: "/chat" },
   { label: "Colophon", href: "/colophon" },
 ];
 
@@ -52,7 +54,7 @@ export type Project = {
   people?: string[];
   client?: string;
 };
-export type GalleryItem = {
+type GalleryItem = {
   cover: Cover;
   caption?: string;
   width: "full" | "twoThirds" | "half" | "third" | "quarter";
@@ -299,12 +301,7 @@ export const playground = [
   { title: "LangGraph, zero to advanced", body: "My notebooks from learning agent graphs, shared for others.", href: "https://github.com/AbdulMomen2/langgraph-zero-to-advance" },
 ];
 
-
-// PLACEHOLDER: replace with real photos in /public/photos and set src.
-export const photos = Array.from({ length: 20 }, (_, i) => ({ src: "", caption: `Photo ${i + 1}` }));
-
-export const clientTags = ["All", "AI", "Enterprise", "Legal", "Commerce", "Marketplace"] as const;
-export const clients: { name: string; note: string; tags: (typeof clientTags)[number][]; href?: string }[] = [
+export const clients: { name: string; note: string; tags: string[]; href?: string }[] = [
   { name: "Clausis", note: "Legal drafting with sources", tags: ["AI", "Legal"] },
   { name: "Genuine Technology & Research", note: "Enterprise AI products", tags: ["AI", "Enterprise"], href: "https://gtrbd.com" },
   { name: "Horse riding company (UK)", note: "Booking and online store", tags: ["Commerce"] },
@@ -312,7 +309,6 @@ export const clients: { name: string; note: string; tags: (typeof clientTags)[nu
   { name: "Shadin Food", note: "Online ordering", tags: ["Commerce"] },
 ];
 
-export const peopleTags = ["All", "Oikko AI", "Engineering", "Product"] as const;
 // PLACEHOLDER: add colleagues and collaborators; tags drive the filter.
 export const people: { name: string; role: string; bio?: string; tags: string[]; href?: string; demo?: boolean }[] = [
   {
@@ -375,6 +371,8 @@ export const pages = {
     signupTitle: "Get new notes by email",
     signupText: "I write about AI engineering, research, and what I'm learning while building Oikko AI.",
     rssLabel: "Subscribe via RSS",
+    signupPlaceholder: "Enter your email",
+    signupButton: "Sign up",
     signedUpText: "Thanks, you're on the list.",
     allLabel: "All notes",
     nextLabel: "Next note",
@@ -396,6 +394,47 @@ export const pages = {
     startedChat: "started a chat",
     emptyText: "Nothing yet. Likes, highlights and chats will show up here.",
     sampleText: "Sample activity, shown until real visitors arrive.",
+  },
+  about: {
+    title: "About",
+    researchTitle: "Research",
+    recognitionTitle: "Recognition",
+    playgroundTitle: "Playground",
+    githubLabel: "View all on GitHub",
+  },
+  contact: {
+    toLabel: "To",
+    fromLabel: "From",
+    fromPlaceholder: "you@company.com",
+    subjectLabel: "Subject",
+    subjectPlaceholder: "What should we build?",
+    messagePlaceholder: "A few lines about the product, the team and the timeline.",
+    hint: "Goes straight to my inbox.",
+    sendLabel: "Send",
+    sendingLabel: "Sending…",
+    sentText: "Thanks. I'll reply to {email}.",
+    mailText: "Couldn't send from here, so your mail app should open with this draft.",
+  },
+  labels: {
+    moreLabel: "More",
+    menuLabel: "Menu",
+    allLabel: "All",
+    profileLabel: "Profile",
+    viewProfileLabel: "View profile",
+    teamLabel: "Team",
+    servicesLabel: "Services",
+    dateLabel: "Date",
+    sampleLabel: "Sample",
+    placeholderLabel: "Placeholder",
+    demoPersonaLabel: "Demo persona",
+    portraitPlaceholder: "Portrait placeholder",
+    highlightsTitle: "Highlights",
+    highlightsHint: "Select any sentence in the note to highlight it.",
+    highlightsEmpty: "No highlights yet.",
+    youLabel: "You",
+    othersLabel: "Others",
+    notFoundTitle: "Not here.",
+    notFoundLink: "Back home",
   },
   clients: { title: "Clients", intro: "", visitLabel: "Visit" },
   people: { title: "People", intro: "Good work is never solo. These are the people I build with, learn from and would happily work with again.", projectsLabel: "Worked on" },

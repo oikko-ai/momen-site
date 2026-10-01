@@ -12,7 +12,7 @@ export default async function Page() {
   return (
     <div className="wrap">
       <PageHead title={pages.clients.title} intro={pages.clients.intro} />
-      <Clients clients={items} tags={tagsOf(items)} visitLabel={pages.clients.visitLabel} />
+      <Clients clients={items} tags={tagsOf(items, pages.labels.allLabel)} visitLabel={pages.clients.visitLabel} />
     </div>
   );
 }

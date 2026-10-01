@@ -72,6 +72,7 @@ export interface Config {
     subscribers: Subscriber;
     messages: Message;
     conversations: Conversation;
+    'chat-usage': ChatUsage;
     activity: Activity;
     photos: Photo;
     clients: Client;
@@ -105,6 +106,7 @@ export interface Config {
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     messages: MessagesSelect<false> | MessagesSelect<true>;
     conversations: ConversationsSelect<false> | ConversationsSelect<true>;
+    'chat-usage': ChatUsageSelect<false> | ChatUsageSelect<true>;
     activity: ActivitySelect<false> | ActivitySelect<true>;
     photos: PhotosSelect<false> | PhotosSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
@@ -533,6 +535,12 @@ export interface Conversation {
   country?: string | null;
   lat?: number | null;
   lon?: number | null;
+  usage?: {
+    model?: string | null;
+    inputTokens?: number | null;
+    outputTokens?: number | null;
+    cost?: number | null;
+  };
   /**
    * Remove from the public sidebar and map.
    */
@@ -542,6 +550,27 @@ export interface Conversation {
    */
   demo?: boolean | null;
   visitor?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * What the chat assistant has cost, per month. The monthly budget and credit are set under Pages → Chat → AI & billing.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-usage".
+ */
+export interface ChatUsage {
+  id: number;
+  /**
+   * YYYY-MM
+   */
+  month: string;
+  answers?: number | null;
+  cost?: number | null;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  cacheReadTokens?: number | null;
+  cacheWriteTokens?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -720,6 +749,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conversations';
         value: number | Conversation;
+      } | null)
+    | ({
+        relationTo: 'chat-usage';
+        value: number | ChatUsage;
       } | null)
     | ({
         relationTo: 'activity';
@@ -923,9 +956,32 @@ export interface ConversationsSelect<T extends boolean = true> {
   country?: T;
   lat?: T;
   lon?: T;
+  usage?:
+    | T
+    | {
+        model?: T;
+        inputTokens?: T;
+        outputTokens?: T;
+        cost?: T;
+      };
   hidden?: T;
   demo?: T;
   visitor?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chat-usage_select".
+ */
+export interface ChatUsageSelect<T extends boolean = true> {
+  month?: T;
+  answers?: T;
+  cost?: T;
+  inputTokens?: T;
+  outputTokens?: T;
+  cacheReadTokens?: T;
+  cacheWriteTokens?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1143,6 +1199,9 @@ export interface Site {
    * Shown on Home and About.
    */
   portrait?: (number | null) | Media;
+  /**
+   * Shown as icons in the footer. LinkedIn, GitHub, X, Instagram, YouTube and others get their own logo.
+   */
   socials?:
     | {
         label: string;
@@ -1155,6 +1214,30 @@ export interface Site {
    */
   available?: boolean | null;
   availableText?: string | null;
+  /**
+   * Leave empty to use the default menu. Tick "Under More" to tuck a link into the More list.
+   */
+  menu?:
+    | {
+        label: string;
+        /**
+         * /about or https://…
+         */
+        href: string;
+        more?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Small links at the bottom right of every page. Your email and the socials above show as icons.
+   */
+  footerLinks?:
+    | {
+        label: string;
+        href: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * The big headline at the top.
    */
@@ -1245,6 +1328,8 @@ export interface Page {
      * Link to the RSS feed under the signup card.
      */
     rssLabel?: string | null;
+    signupPlaceholder?: string | null;
+    signupButton?: string | null;
     signedUpText?: string | null;
     allLabel?: string | null;
     nextLabel?: string | null;
@@ -1253,6 +1338,56 @@ export interface Page {
   photos: {
     title: string;
     intro?: string | null;
+  };
+  /**
+   * Section titles on the About page. The heading and text are under About page.
+   */
+  about?: {
+    title?: string | null;
+    researchTitle?: string | null;
+    recognitionTitle?: string | null;
+    playgroundTitle?: string | null;
+    githubLabel?: string | null;
+  };
+  /**
+   * Write {email} where the sender's address should go.
+   */
+  contact?: {
+    toLabel?: string | null;
+    fromLabel?: string | null;
+    fromPlaceholder?: string | null;
+    subjectLabel?: string | null;
+    subjectPlaceholder?: string | null;
+    messagePlaceholder?: string | null;
+    hint?: string | null;
+    sendLabel?: string | null;
+    sendingLabel?: string | null;
+    sentText?: string | null;
+    mailText?: string | null;
+  };
+  /**
+   * Buttons and badges used across the site.
+   */
+  labels?: {
+    moreLabel?: string | null;
+    menuLabel?: string | null;
+    allLabel?: string | null;
+    profileLabel?: string | null;
+    viewProfileLabel?: string | null;
+    teamLabel?: string | null;
+    servicesLabel?: string | null;
+    dateLabel?: string | null;
+    sampleLabel?: string | null;
+    placeholderLabel?: string | null;
+    demoPersonaLabel?: string | null;
+    portraitPlaceholder?: string | null;
+    highlightsTitle?: string | null;
+    highlightsHint?: string | null;
+    highlightsEmpty?: string | null;
+    youLabel?: string | null;
+    othersLabel?: string | null;
+    notFoundTitle?: string | null;
+    notFoundLink?: string | null;
   };
   activity: {
     title: string;
@@ -1336,6 +1471,33 @@ export interface Chat {
    * List visitors' past questions in the sidebar and on the map. Hide any single conversation under Inbox → Conversations.
    */
   showConversations?: boolean | null;
+  ai: {
+    /**
+     * Off: every question gets the offline text, and nothing is spent.
+     */
+    enabled?: boolean | null;
+    model: 'claude-opus-5-5' | 'claude-sonnet-5-5' | 'claude-haiku-4-5';
+    /**
+     * How much the model thinks before answering. Not used by Haiku.
+     */
+    effort: 'low' | 'medium' | 'high';
+    /**
+     * About 0.75 words per token, thinking included.
+     */
+    maxTokens: number;
+    /**
+     * Chat stops answering with AI once this month's cost reaches it. Empty means no monthly cap.
+     */
+    monthlyBudget?: number | null;
+    /**
+     * Optional. Total you've set aside for the chat, across all months. Empty means unlimited.
+     */
+    credit?: number | null;
+    dailyPerVisitor: number;
+    limitText?: string | null;
+    spentThisMonth?: number | null;
+    spentTotal?: number | null;
+  };
   /**
    * How the assistant should answer: voice, length, what to say about pricing or availability.
    */
@@ -1365,6 +1527,21 @@ export interface SiteSelect<T extends boolean = true> {
       };
   available?: T;
   availableText?: T;
+  menu?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        more?: T;
+        id?: T;
+      };
+  footerLinks?:
+    | T
+    | {
+        label?: T;
+        href?: T;
+        id?: T;
+      };
   tagline?: T;
   intro?: T;
   aboutHeading?: T;
@@ -1443,6 +1620,8 @@ export interface PagesSelect<T extends boolean = true> {
         signupTitle?: T;
         signupText?: T;
         rssLabel?: T;
+        signupPlaceholder?: T;
+        signupButton?: T;
         signedUpText?: T;
         allLabel?: T;
         nextLabel?: T;
@@ -1453,6 +1632,53 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         title?: T;
         intro?: T;
+      };
+  about?:
+    | T
+    | {
+        title?: T;
+        researchTitle?: T;
+        recognitionTitle?: T;
+        playgroundTitle?: T;
+        githubLabel?: T;
+      };
+  contact?:
+    | T
+    | {
+        toLabel?: T;
+        fromLabel?: T;
+        fromPlaceholder?: T;
+        subjectLabel?: T;
+        subjectPlaceholder?: T;
+        messagePlaceholder?: T;
+        hint?: T;
+        sendLabel?: T;
+        sendingLabel?: T;
+        sentText?: T;
+        mailText?: T;
+      };
+  labels?:
+    | T
+    | {
+        moreLabel?: T;
+        menuLabel?: T;
+        allLabel?: T;
+        profileLabel?: T;
+        viewProfileLabel?: T;
+        teamLabel?: T;
+        servicesLabel?: T;
+        dateLabel?: T;
+        sampleLabel?: T;
+        placeholderLabel?: T;
+        demoPersonaLabel?: T;
+        portraitPlaceholder?: T;
+        highlightsTitle?: T;
+        highlightsHint?: T;
+        highlightsEmpty?: T;
+        youLabel?: T;
+        othersLabel?: T;
+        notFoundTitle?: T;
+        notFoundLink?: T;
       };
   activity?:
     | T
@@ -1523,6 +1749,20 @@ export interface ChatSelect<T extends boolean = true> {
   chatLabel?: T;
   mapLabel?: T;
   showConversations?: T;
+  ai?:
+    | T
+    | {
+        enabled?: T;
+        model?: T;
+        effort?: T;
+        maxTokens?: T;
+        monthlyBudget?: T;
+        credit?: T;
+        dailyPerVisitor?: T;
+        limitText?: T;
+        spentThisMonth?: T;
+        spentTotal?: T;
+      };
   instructions?: T;
   facts?: T;
   updatedAt?: T;

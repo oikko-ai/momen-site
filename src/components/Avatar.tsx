@@ -1,6 +1,6 @@
 import type { Media } from "@/lib/cms";
 
-export const hue = (name: string) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
+const hue = (name: string) => [...name].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
 const initials = (name: string) =>
   name
     .split(" ")

@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getNotes, getPages, getSite } from "@/lib/cms";
@@ -39,7 +40,7 @@ export default async function Notes() {
                       <li key={n.slug}>
                         {n.href ? (
                           <a href={n.href} target="_blank" rel="noreferrer" className="group block py-2">
-                            <span className="text-h3 font-light transition-colors group-hover:text-soft">{n.title}</span> <span className="text-faint">↗</span>
+                            <span className="text-h3 font-light transition-colors group-hover:text-soft">{n.title}</span> <ArrowUpRight className="inline-block align-[-0.1em] text-faint" size="1em" strokeWidth={1.75} aria-hidden />
                             {n.summary && <span className="mt-1 block text-small text-soft">{n.summary}</span>}
                           </a>
                         ) : (
@@ -55,7 +56,7 @@ export default async function Notes() {
             ))
           )}
         </div>
-        <Subscribe email={site.email} title={p.signupTitle} text={p.signupText} doneText={p.signedUpText} rss={p.rssLabel && !process.env.NEXT_PUBLIC_PREVIEW ? "/notes/rss.xml" : undefined} rssLabel={p.rssLabel} />
+        <Subscribe email={site.email} title={p.signupTitle} text={p.signupText} doneText={p.signedUpText} placeholder={p.signupPlaceholder} button={p.signupButton} rss={p.rssLabel && !process.env.NEXT_PUBLIC_PREVIEW ? "/notes/rss.xml" : undefined} rssLabel={p.rssLabel} />
       </div>
     </div>
   );

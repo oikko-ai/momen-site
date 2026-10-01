@@ -1,11 +1,12 @@
 "use client";
 
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Testimonial } from "@/lib/cms";
 import Avatar from "./Avatar";
 
 // Large quotes that cross-fade one to the next. Advances on its own and pauses while hovered.
-export default function Testimonials({ items, title }: { items: Testimonial[]; title?: string }) {
+export default function Testimonials({ items, title, placeholderLabel }: { items: Testimonial[]; title?: string; placeholderLabel: string }) {
   const [i, setI] = useState(0);
   const [paused, setPaused] = useState(false);
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function Testimonials({ items, title }: { items: Testimonial[]; t
                   aria-label={d < 0 ? "Previous quote" : "Next quote"}
                   className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-soft transition-colors hover:border-white/30 hover:text-ink"
                 >
-                  {d < 0 ? "←" : "→"}
+                  {d < 0 ? <ArrowLeft className="h-[18px] w-[18px]" strokeWidth={1.75} /> : <ArrowRight className="h-[18px] w-[18px]" strokeWidth={1.75} />}
                 </button>
               ))}
             </div>
@@ -56,7 +57,7 @@ export default function Testimonials({ items, title }: { items: Testimonial[]; t
                 <span className="block text-body">{t.name}</span>
                 <span className="block text-small text-soft">{[t.role, t.client].filter(Boolean).join(" · ")}</span>
               </span>
-              {t.demo && <span className="eyebrow ml-auto rounded-full border border-white/10 px-3 py-1.5">Placeholder</span>}
+              {t.demo && <span className="eyebrow ml-auto rounded-full border border-white/10 px-3 py-1.5">{placeholderLabel}</span>}
             </figcaption>
           </figure>
         ))}

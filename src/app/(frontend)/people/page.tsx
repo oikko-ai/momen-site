@@ -14,7 +14,7 @@ export default async function Page() {
   return (
     <div className="wrap">
       <PageHead title={pages.people.title} intro={pages.people.intro} />
-      <People people={items} tags={tagsOf(items)} projectsLabel={pages.people.projectsLabel} />
+      <People people={items} tags={tagsOf(items, pages.labels.allLabel)} projectsLabel={pages.people.projectsLabel} labels={pages.labels} />
     </div>
   );
 }

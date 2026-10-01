@@ -4,6 +4,7 @@ import * as migration_20260930_234351_media_personas from './20260930_234351_med
 import * as migration_20261001_021254_notes_articles from './20261001_021254_notes_articles';
 import * as migration_20261001_102350_relations_polish from './20261001_102350_relations_polish';
 import * as migration_20261001_104633_activity_chat from './20261001_104633_activity_chat';
+import * as migration_20261001_112136_launch_audit from './20261001_112136_launch_audit';
 
 export const migrations = [
   {
@@ -34,6 +35,11 @@ export const migrations = [
   {
     up: migration_20261001_104633_activity_chat.up,
     down: migration_20261001_104633_activity_chat.down,
-    name: '20261001_104633_activity_chat'
+    name: '20261001_104633_activity_chat',
+  },
+  {
+    up: migration_20261001_112136_launch_audit.up,
+    down: migration_20261001_112136_launch_audit.down,
+    name: '20261001_112136_launch_audit'
   },
 ];

@@ -1,12 +1,14 @@
 import Link from "next/link";
 import PageHead from "@/components/PageHead";
+import { getPages } from "@/lib/cms";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const { labels } = await getPages();
   return (
     <div className="wrap">
-      <PageHead title="Not here." />
+      <PageHead title={labels.notFoundTitle} />
       <Link href="/" className="u text-lead">
-        Back home
+        {labels.notFoundLink}
       </Link>
     </div>
   );

@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { getAwards, getClients, getNotes, getPages, getPapers, getPeople, getProjects, getSite, getTestimonials } from "@/lib/cms";
 import Rail from "@/components/Rail";
@@ -61,14 +62,8 @@ export async function HomeView() {
 
       <Rail items={featured} />
 
-      {stats.length > 0 && (
-        <section className="wrap mt-section">
-          <Stats items={stats} />
-        </section>
-      )}
-
-      <section className="wrap mt-section grid items-start gap-block md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]" data-inview>
-        <Portrait src={site.portrait?.url} name={site.name} className="aspect-[4/5] w-full" />
+      <section className="wrap mt-section grid items-start gap-block md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] xl:grid-cols-[minmax(0,480px)_minmax(0,1fr)] xl:gap-24" data-inview>
+        <Portrait src={site.portrait?.url} name={site.name} label={pages.labels.portraitPlaceholder} className="aspect-[4/5] w-full" />
         <div className="md:pt-4">
           <h2 className="whitespace-pre-line text-h2 font-light">{site.aboutHeading}</h2>
           <div className="mt-8 max-w-[60ch] space-y-5 text-lead text-soft">
@@ -78,7 +73,7 @@ export async function HomeView() {
           </div>
           <Link href="/about" className="group mt-8 inline-flex items-center gap-2 text-body">
             <span className="u">{h.aboutLink}</span>
-            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size="1em" strokeWidth={1.75} aria-hidden />
           </Link>
         </div>
       </section>
@@ -105,11 +100,17 @@ export async function HomeView() {
         </section>
       )}
 
+      {stats.length > 0 && (
+        <section className="wrap mt-section">
+          <Stats items={stats} />
+        </section>
+      )}
+
       <section className="mt-section">
         <div className="wrap flex items-baseline justify-between" data-inview>
           <h2 className="text-h2 font-light">{h.workTitle}</h2>
           <Link href="/work" className="group inline-flex items-center gap-2 text-body text-soft transition-colors hover:text-ink">
-            {h.seeAllLabel} <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+            {h.seeAllLabel} <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size="1em" strokeWidth={1.75} aria-hidden />
           </Link>
         </div>
         <div className="mt-block" data-inview>
@@ -130,7 +131,7 @@ export async function HomeView() {
 
       {testimonials.length > 0 && (
         <section className="wrap mt-section" data-inview>
-          <Testimonials items={testimonials} title={h.testimonialsTitle} />
+          <Testimonials items={testimonials} title={h.testimonialsTitle} placeholderLabel={pages.labels.placeholderLabel} />
         </section>
       )}
 
@@ -139,7 +140,7 @@ export async function HomeView() {
           {site.contactHeading}
         </h2>
         <div className="mx-auto mt-block max-w-[800px]" data-inview>
-          <ContactForm to={site.email} />
+          <ContactForm to={site.email} t={pages.contact} />
         </div>
       </section>
     </>

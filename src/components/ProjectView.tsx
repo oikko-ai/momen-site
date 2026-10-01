@@ -1,3 +1,4 @@
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { getNotes, getPages, getProjects, getTestimonials, type GalleryImage } from "@/lib/cms";
 import Visual from "@/components/Visual";
@@ -31,7 +32,8 @@ function Tile({ g, id, i, target }: { g: GalleryImage; id: string; i: number; ta
   const padded = g.frame !== "none" || (g.background !== "none" && g.fit === "contain");
   return (
     <figure id={`s${target.section}-${target.item}`} className={`scroll-mt-24 ${span[g.width]}`} data-inview style={{ transitionDelay: `${(i % 3) * 80}ms` }}>
-      <div className={`group/m relative overflow-hidden rounded-2xl ${panel[g.background]}`} style={{ aspectRatio: g.aspect }}>
+      {/* Full-width images stop short of the screen height, so one never fills the whole view. */}
+      <div className={`group/m relative overflow-hidden rounded-2xl ${panel[g.background]} ${g.width === "full" ? "max-h-[min(78vh,780px)] w-full" : ""}`} style={{ aspectRatio: g.aspect }}>
         <div className={`settle absolute inset-0 ${padded ? "p-[5%]" : ""}`}>
           {g.frame === "browser" ? (
             <div className="flex h-full flex-col overflow-hidden rounded-xl bg-[#1b1b1b] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.9)]">
@@ -90,7 +92,7 @@ export default async function ProjectView({ slug }: { slug: string }) {
               <dd className="pt-1 text-ink/90">
                 {p.client.href ? (
                   <a href={p.client.href} target="_blank" rel="noreferrer" className="u">
-                    {p.client.name} ↗
+                    {p.client.name} <ArrowUpRight className="inline-block align-[-0.1em]" size="1em" strokeWidth={1.75} aria-hidden />
                   </a>
                 ) : (
                   p.client.name
@@ -98,9 +100,9 @@ export default async function ProjectView({ slug }: { slug: string }) {
               </dd>
             </>
           )}
-          <Label>Team</Label>
-          <dd>{p.teamMembers.length ? <Team people={p.teamMembers} /> : <span className="text-soft">{p.team}</span>}</dd>
-          <Label>Services</Label>
+          <Label>{pages.labels.teamLabel}</Label>
+          <dd>{p.teamMembers.length ? <Team people={p.teamMembers} viewProfile={pages.labels.viewProfileLabel} /> : <span className="text-soft">{p.team}</span>}</dd>
+          <Label>{pages.labels.servicesLabel}</Label>
           <dd className="flex flex-wrap gap-2">
             {p.services.map((s) => (
               <span key={s} className="rounded-full border border-white/15 px-3 py-1.5 font-mono text-label uppercase text-ink/90">
@@ -108,7 +110,7 @@ export default async function ProjectView({ slug }: { slug: string }) {
               </span>
             ))}
           </dd>
-          <Label>Date</Label>
+          <Label>{pages.labels.dateLabel}</Label>
           <dd className="pt-1 text-ink/90">{p.year}</dd>
         </dl>
       </div>
@@ -133,7 +135,7 @@ export default async function ProjectView({ slug }: { slug: string }) {
 
       {said.length > 0 && (
         <section className="mt-section border-t border-rule pt-block" data-inview>
-          <Testimonials items={said} />
+          <Testimonials items={said} placeholderLabel={pages.labels.placeholderLabel} />
         </section>
       )}
 
@@ -145,7 +147,7 @@ export default async function ProjectView({ slug }: { slug: string }) {
               <li key={n.slug} className="border-t border-rule">
                 <Link href={n.href ?? `/notes/${n.slug}`} className="group flex items-baseline justify-between gap-6 py-6">
                   <span className="text-h3 font-light transition-colors group-hover:text-soft">{n.title}</span>
-                  <span className="shrink-0 transition-transform duration-300 group-hover:translate-x-1">→</span>
+                  <ArrowRight className="shrink-0 self-center text-soft transition-transform duration-300 group-hover:translate-x-1" size="1em" strokeWidth={1.75} aria-hidden />
                 </Link>
               </li>
             ))}
@@ -158,7 +160,7 @@ export default async function ProjectView({ slug }: { slug: string }) {
           <span className="eyebrow">{pages.work.nextLabel}</span>
           <span className="mt-4 flex items-baseline justify-between gap-6">
             <span className="text-h1 font-light transition-colors duration-300 group-hover:text-soft">{next.title}</span>
-            <span className="text-h2 transition-transform duration-500 ease-[var(--ease)] group-hover:translate-x-2">→</span>
+            <ArrowRight className="shrink-0 self-center text-h2 transition-transform duration-500 ease-[var(--ease)] group-hover:translate-x-2" size="1em" strokeWidth={1.25} aria-hidden />
           </span>
         </Link>
       )}

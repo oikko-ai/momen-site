@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import type { Client } from "@/lib/cms";
@@ -7,8 +8,8 @@ import Chips from "@/components/Chips";
 
 // An A to Z index of clients. Each row shows what they do, the projects made for them and a link to their site.
 export default function Clients({ clients, tags, visitLabel }: { clients: Client[]; tags: string[]; visitLabel: string }) {
-  const [tag, setTag] = useState<string>("All");
-  const list = clients.filter((c) => tag === "All" || c.tags.includes(tag)).sort((a, b) => a.name.localeCompare(b.name));
+  const [tag, setTag] = useState(tags[0]);
+  const list = clients.filter((c) => tag === tags[0] || c.tags.includes(tag)).sort((a, b) => a.name.localeCompare(b.name));
   return (
     <>
       <Chips tags={tags} value={tag} onChange={setTag} />
@@ -42,7 +43,7 @@ export default function Clients({ clients, tags, visitLabel }: { clients: Client
               <span className="col-start-2 md:col-start-auto md:text-right">
                 {c.href && (
                   <a href={c.href} target="_blank" rel="noreferrer" className="relative z-10 inline-flex items-center gap-1.5 text-small text-soft transition-colors hover:text-ink">
-                    {visitLabel} <span>↗</span>
+                    {visitLabel} <ArrowUpRight size="1em" strokeWidth={1.75} aria-hidden />
                   </a>
                 )}
               </span>

@@ -23,15 +23,31 @@ Saving in the CMS updates the live site straight away.
 
 ## Deploy
 
-Any Node host that runs Next.js works (Vercel, Railway, Render, a VPS).
+Step-by-step guide for Vercel, Neon Postgres and Vercel Blob: [docs/DEPLOY.md](docs/DEPLOY.md).
 
-- Set `PAYLOAD_SECRET`.
-- Set `DATABASE_URL` to a Postgres database (for example Neon). Tables are created automatically on first start.
-- On Vercel, create a Blob store and set `BLOB_READ_WRITE_TOKEN` so uploaded images are kept. Elsewhere, uploads are saved to `media/`.
-- Optional: set `NEXT_PUBLIC_SITE_URL` to your domain for full links in the notes RSS feed (`/notes/rss.xml`), `/sitemap.xml` and `robots.txt`. Email signups are saved under Writing → Subscribers, and contact form messages under Inbox → Messages.
-- Chat: set `ANTHROPIC_API_KEY` (from console.anthropic.com) so the Chat page answers visitors with Claude, using what the CMS says about your work plus the instructions and facts under Pages → Chat. Optional `CHAT_MODEL` picks the model (default `claude-sonnet-5-5`). Without a key, visitors get the "AI not connected" text from the same page and their questions are still saved.
-- Visitor data: chats are saved under Inbox → Conversations and likes, highlights and new chats under Inbox → Activity. Locations come from Vercel's request headers (city and country only, no IP addresses). Tick Hidden on anything you don't want shown, and delete the entries marked Sample once real visitors arrive.
-- Visit `/admin` and create your login.
+In short, set these environment variables, deploy, then visit `/admin` to create your login:
+
+| Variable | Needed | What it is |
+|---|---|---|
+| `PAYLOAD_SECRET` | Yes | Long random string that signs CMS logins |
+| `DATABASE_URL` | Yes | Postgres connection string, for example from Neon |
+| `BLOB_READ_WRITE_TOKEN` | Yes on Vercel | Keeps uploaded images |
+| `ANTHROPIC_API_KEY` | For AI chat | From console.anthropic.com |
+| `NEXT_PUBLIC_SITE_URL` | Recommended | Your domain, for the sitemap, RSS and share links |
+
+## Where visitor data goes
+
+- **Inbox → Messages**: the contact form.
+- **Writing → Subscribers**: note signups.
+- **Inbox → Conversations**: every chat, with its cost.
+- **Inbox → Activity**: likes, highlights and new chats, shown on `/activity`.
+- **Inbox → AI usage**: chat cost per month.
+
+Locations come from Vercel's request headers (city and country only, no IP addresses). Tick *Hidden* on anything you don't want shown publicly.
+
+## Chat and billing
+
+Under **Pages → Chat → AI & billing** you choose the Claude model, how hard it thinks, the longest answer, a monthly budget in USD, an optional total credit, and how many questions one visitor can ask per day. Each answer's tokens and cost are saved on its conversation and added to that month under **Inbox → AI usage**. Once the month's spend reaches the budget, or total spend reaches the credit, the chat answers with the offline text, which points visitors to your email. Without `ANTHROPIC_API_KEY` it does the same.
 
 ## Preview build
 

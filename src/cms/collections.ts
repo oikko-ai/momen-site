@@ -5,6 +5,7 @@ import { Notes, Subscribers } from "./notes";
 import { Messages } from "./messages";
 import { Activity, likeMedia } from "./activity";
 import { Conversations } from "./chat";
+import { ChatUsage } from "./usage";
 
 const publicRead = { read: () => true };
 const orderField = { name: "order", type: "number", defaultValue: 0, admin: { position: "sidebar", description: "Lower numbers show first." } } as const;
@@ -200,4 +201,4 @@ export const Playground = simple("playground", "About", "title", [
   { name: "href", type: "text", label: "Link" },
 ]);
 
-export const collections = [Projects, Notes, Subscribers, Messages, Conversations, Activity, Photos, Clients, People, Testimonials, Papers, Awards, Playground, Media, Users];
+export const collections = [Projects, Notes, Subscribers, Messages, Conversations, ChatUsage, Activity, Photos, Clients, People, Testimonials, Papers, Awards, Playground, Media, Users];

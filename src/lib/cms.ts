@@ -2,7 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { getPayload } from "payload";
 import config from "@payload-config";
-import { pages as startPages, type Cover } from "@/content";
+import { footerLinks as startFooter, menu as startMenu, pages as startPages, type Cover } from "@/content";
 import { chat as startChat } from "@/visitors-content";
 import { toActivity, toConversation } from "./feed";
 
@@ -96,6 +96,8 @@ export const getSite = cache(async () => {
     aboutBody: ((s.aboutBody as { text: string }[]) ?? []).map((p) => p.text),
     approach: ((s.approach as { title: string; body: string }[]) ?? []).map(({ title, body }) => ({ title, body })),
     contactHeading: (s.contactHeading as string) ?? "",
+    menu: ((s.menu as { label: string; href: string; more?: boolean }[] | undefined)?.length ? (s.menu as typeof startMenu) : startMenu).map(({ label, href, more }) => ({ label, href, more: !!more })),
+    footerLinks: ((s.footerLinks as { label: string; href: string }[] | undefined)?.length ? (s.footerLinks as typeof startFooter) : startFooter).map(({ label, href }) => ({ label, href })),
   };
 });
 export type Site = Awaited<ReturnType<typeof getSite>>;
@@ -240,6 +242,9 @@ export const getPages = cache(async () => {
     work: merge("work", startPages.work),
     notes: merge("notes", startPages.notes),
     photos: merge("photos", startPages.photos),
+    about: merge("about", startPages.about),
+    contact: merge("contact", startPages.contact),
+    labels: merge("labels", startPages.labels),
     clients: merge("clients", startPages.clients),
     people: merge("people", startPages.people),
     colophon: merge("colophon", startPages.colophon),
@@ -247,8 +252,8 @@ export const getPages = cache(async () => {
 });
 export type Pages = Awaited<ReturnType<typeof getPages>>;
 
-// Filter chips: "All" plus every tag used, in first-seen order.
-export const tagsOf = (rows: { tags: string[] }[]) => ["All", ...new Set(rows.flatMap((r) => r.tags))];
+// Filter chips: "All" (from Labels) plus every tag used, in first-seen order.
+export const tagsOf = (rows: { tags: string[] }[], all: string) => [all, ...new Set(rows.flatMap((r) => r.tags))];
 
 // Latest visitor activity and chats, as of this render. The pages refresh them in the browser.
 export const getActivity = cache(async () => {

@@ -1,7 +1,7 @@
 import type { Payload } from "payload";
 import * as c from "../content";
 import { startNotes } from "../notes-content";
-import { chat, sampleActivity, sampleConversations } from "../visitors-content";
+import { ai, chat, sampleActivity, sampleConversations } from "../visitors-content";
 import { toLexical } from "./lexical";
 
 type Row = Record<string, unknown> & { id: number | string };
@@ -9,7 +9,7 @@ type StartProject = (typeof c.projects)[number];
 const devices = ["phone", "laptop", "tablet"] as const;
 
 // Bump when the starting content gains something existing databases should receive once.
-const CONTENT_VERSION = 5;
+const CONTENT_VERSION = 6;
 
 // Gallery for a section: the media written in content.ts, or one full-width placeholder.
 const gallery = (s: StartProject["sections"][number]) =>
@@ -45,6 +45,8 @@ export async function seed(payload: Payload) {
       aboutBody: c.homeAbout.body.map((text) => ({ text })),
       approach: c.approach,
       contactHeading: c.contactHeading,
+      menu: c.menu,
+      footerLinks: c.footerLinks,
     },
   });
   await payload.updateGlobal({
@@ -81,7 +83,7 @@ export async function seed(payload: Payload) {
 
 // Chat settings, plus sample activity and conversations so the pages aren't empty before real visitors arrive.
 async function visitors(payload: Payload) {
-  await payload.updateGlobal({ slug: "chat", data: chat as never });
+  await payload.updateGlobal({ slug: "chat", data: { ...chat, ai } as never });
   if (!(await payload.count({ collection: "activity" })).totalDocs)
     for (const a of sampleActivity) await payload.create({ collection: "activity", data: a as never, context: { skipRefresh: true } });
   if (!(await payload.count({ collection: "conversations" })).totalDocs)
@@ -187,6 +189,21 @@ async function upgrade(payload: Payload) {
     await payload.updateGlobal({ slug: "pages", data: { activity: { ...c.pages.activity, ...Object.fromEntries(Object.entries(current.activity ?? {}).filter(([, v]) => v)) } } as never });
     const settings = (await payload.findGlobal({ slug: "chat" })) as unknown as { greeting?: string };
     if (!settings.greeting) await visitors(payload);
+  }
+
+  if (version < 6) {
+    // Menu, footer, labels and contact form text move into the CMS; chat gains AI and billing settings.
+    const current = (await payload.findGlobal({ slug: "pages" })) as unknown as Record<string, Record<string, unknown> | undefined>;
+    const keep = (key: "about" | "contact" | "labels") => ({ ...c.pages[key], ...Object.fromEntries(Object.entries(current[key] ?? {}).filter(([, v]) => v)) });
+    const notes = { ...(current.notes ?? {}), signupPlaceholder: current.notes?.signupPlaceholder || c.pages.notes.signupPlaceholder, signupButton: current.notes?.signupButton || c.pages.notes.signupButton };
+    await payload.updateGlobal({ slug: "pages", data: { about: keep("about"), contact: keep("contact"), labels: keep("labels"), notes } as never });
+    const site = (await payload.findGlobal({ slug: "site" })) as unknown as { menu?: unknown[]; footerLinks?: unknown[] };
+    await payload.updateGlobal({
+      slug: "site",
+      data: { ...(!site.menu?.length && { menu: c.menu }), ...(!site.footerLinks?.length && { footerLinks: c.footerLinks }) } as never,
+    });
+    const settings = (await payload.findGlobal({ slug: "chat" })) as unknown as { ai?: Record<string, unknown> };
+    await payload.updateGlobal({ slug: "chat", data: { ai: { ...ai, ...Object.fromEntries(Object.entries(settings.ai ?? {}).filter(([, v]) => v != null)) } } as never });
   }
 
   await payload.updateGlobal({ slug: "pages", data: { contentVersion: CONTENT_VERSION } as never });
