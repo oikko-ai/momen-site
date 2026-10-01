@@ -16,7 +16,7 @@ export default function WorkStrip({ items }: { items: Project[] }) {
             href={`/work/${p.slug}`}
             aria-hidden={i >= items.length}
             tabIndex={i >= items.length ? -1 : undefined}
-            className="group relative grid h-[210px] w-[300px] shrink-0 place-items-center overflow-hidden rounded-xl bg-card md:h-[250px] md:w-[360px]"
+            data-spot className="group relative grid h-[230px] w-[320px] shrink-0 place-items-center overflow-hidden rounded-2xl bg-card md:h-[300px] md:w-[430px]"
           >
             <div
               className={`transition-transform duration-700 ease-[var(--ease)] group-hover:-translate-y-1.5 group-hover:scale-[1.04] ${
@@ -31,8 +31,8 @@ export default function WorkStrip({ items }: { items: Project[] }) {
               />
             </div>
             <div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 bg-gradient-to-t from-black/80 to-transparent p-4 pt-10 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-              <p className="text-[13px]">{p.title}</p>
-              <p className="text-[12px] text-white/60">{p.subtitle}</p>
+              <p className="text-small">{p.title}</p>
+              <p className="text-micro text-white/60">{p.subtitle}</p>
             </div>
           </Link>
         ))}

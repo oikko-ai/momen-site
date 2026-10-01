@@ -9,7 +9,7 @@ export default function Chips({ tags, value, onChange }: { tags: readonly string
           role="tab"
           aria-selected={value === t}
           onClick={() => onChange(t)}
-          className={`rounded-full px-3.5 py-1.5 text-[13px] transition-colors duration-200 ${value === t ? "bg-ink text-paper" : "bg-card text-soft hover:text-ink"}`}
+          className={`rounded-full px-4 py-2 text-small transition-colors duration-200 ${value === t ? "bg-ink text-paper" : "bg-card text-soft hover:text-ink"}`}
         >
           {t}
         </button>

@@ -11,7 +11,8 @@ const icons: Record<string, React.ReactNode> = {
 export default function Footer({ site }: { site: Site }) {
   const links = [{ label: "Email", href: `mailto:${site.email}` }, ...site.socials];
   return (
-    <footer className="mt-32 grid grid-cols-1 items-center gap-5 px-5 pb-8 text-[13px] text-soft md:grid-cols-3 md:px-7">
+    <footer className="wrap mt-section">
+      <div className="grid grid-cols-1 items-center gap-5 border-t border-rule pb-10 pt-8 text-small text-soft md:grid-cols-3">
       <p>© {new Date().getFullYear()} {site.name}</p>
       <ul className="flex gap-6 md:justify-center">
         {links.map((l) => (
@@ -24,11 +25,12 @@ export default function Footer({ site }: { site: Site }) {
           </li>
         ))}
       </ul>
-      <ul className="flex gap-4 uppercase tracking-[0.06em] md:justify-end">
+      <ul className="flex gap-6 font-mono text-label uppercase md:justify-end">
         <li><Link className="hover:text-ink" href="/clients">Clients</Link></li>
         <li><Link className="hover:text-ink" href="/people">People</Link></li>
         <li><Link className="hover:text-ink" href="/colophon">Colophon</Link></li>
       </ul>
+      </div>
     </footer>
   );
 }

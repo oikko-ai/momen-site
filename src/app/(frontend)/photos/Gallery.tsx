@@ -13,7 +13,7 @@ function Tile({ p, i, big = false }: { p: Photo; i: number; big?: boolean }) {
     return <img src={p.image.url} alt={p.caption} className="h-full w-full object-cover" loading="lazy" />;
   return (
     <div className="grid h-full w-full place-items-center" style={{ background: `radial-gradient(120% 100% at 30% 20%, ${tints[i % 6]}, #0c0c0c)` }}>
-      <span className={`text-soft ${big ? "text-[14px]" : "text-[11px]"}`}>Photo {i + 1}</span>
+      <span className={`eyebrow ${big ? "text-soft" : ""}`}>Photo {i + 1}</span>
     </div>
   );
 }
@@ -33,9 +33,9 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:gap-3 lg:grid-cols-4">
         {photos.map((p, i) => (
-          <button key={i} onClick={() => setOpen(i)} className="rise aspect-[4/3] overflow-hidden" style={{ ["--i" as string]: i }} aria-label={`Open ${p.caption}`}>
+          <button key={i} onClick={() => setOpen(i)} className="rise aspect-[4/3] overflow-hidden rounded-2xl" style={{ ["--i" as string]: i }} aria-label={`Open ${p.caption}`}>
             <div className="h-full w-full transition-transform duration-500 ease-[var(--ease)] hover:scale-105">
               <Tile p={p} i={i} />
             </div>
@@ -44,7 +44,7 @@ export default function Gallery({ photos }: { photos: Photo[] }) {
       </div>
       {open !== null && (
         <div className="fade fixed inset-0 z-50 grid place-items-center bg-black/95 p-6" onClick={() => setOpen(null)} role="dialog" aria-modal>
-          <div className="pop aspect-[4/3] w-full max-w-[900px] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="pop aspect-[4/3] w-full max-w-[1100px] overflow-hidden rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <Tile p={photos[open]} i={open} big />
           </div>
           <button className="absolute right-5 top-5 grid h-9 w-9 place-items-center rounded-full bg-white/10 text-ink" onClick={() => setOpen(null)} aria-label="Close">

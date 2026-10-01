@@ -75,6 +75,7 @@ export const Notes: CollectionConfig = {
     { name: "summary", type: "textarea", admin: { description: "One or two sentences for link previews and search engines." } },
     { name: "href", type: "text", label: "External link", admin: { description: "Optional. If set, the Notes list links to this address instead of the note page." } },
     { name: "cover", type: "upload", relationTo: "media", admin: { description: "Optional image shown under the title." } },
+    { name: "projects", type: "relationship", relationTo: "projects", hasMany: true, label: "Related work", admin: { description: "Projects this note is about, shown as cards at the end of the note." } },
     {
       name: "body",
       type: "richText",

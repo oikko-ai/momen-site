@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { getPages, getProjects, type GalleryImage } from "@/lib/cms";
+import { getNotes, getPages, getProjects, getTestimonials, type GalleryImage } from "@/lib/cms";
 import Visual from "@/components/Visual";
 import Team from "@/components/Team";
 import Like from "@/components/Like";
+import Words from "@/components/Words";
+import Testimonials from "@/components/Testimonials";
 
 // Share of the 12-column grid each width takes; small tiles pair up on phones.
 const span: Record<GalleryImage["width"], string> = {
@@ -56,36 +58,52 @@ function Tile({ g, id, i }: { g: GalleryImage; id: string; i: number }) {
         </div>
         <Like id={`${id}-${i}`} count={g.likes} />
       </div>
-      {g.caption && <figcaption className="mt-3 text-[14px] leading-relaxed text-soft">{g.caption}</figcaption>}
+      {g.caption && <figcaption className="mt-3 text-small text-soft">{g.caption}</figcaption>}
     </figure>
   );
 }
 
-const Label = ({ children }: { children: string }) => <dt className="pt-2 font-mono text-[11px] uppercase tracking-[0.12em] text-faint">{children}</dt>;
+const Label = ({ children }: { children: string }) => <dt className="eyebrow pt-2">{children}</dt>;
 
 // Case study body, shared by the /work/[slug] route and the single-page preview.
 export default async function ProjectView({ slug }: { slug: string }) {
-  const [projects, pages] = await Promise.all([getProjects(), getPages()]);
+  const [projects, pages, quotes, notes] = await Promise.all([getProjects(), getPages(), getTestimonials(), getNotes()]);
   const i = projects.findIndex((x) => x.slug === slug);
   const p = projects[i];
   if (!p) return null;
   const next = projects[(i + 1) % projects.length];
+  const said = quotes.filter((t) => t.project?.slug === p.slug);
+  const writing = notes.filter((n) => n.projects.includes(p.id));
   return (
-    <article className="mx-auto max-w-[1120px] px-5 md:px-7">
-      <h1 className="rise pt-10 text-[60px] font-light leading-[0.95] tracking-[-0.045em] md:pt-16 md:text-[120px] lg:text-[148px]">{p.title}</h1>
+    <article className="wrap">
+      <Words text={p.title} className="pt-page text-display font-light" />
 
-      <div className="mt-12 grid gap-10 md:mt-16 md:grid-cols-[1.15fr_1fr] md:gap-16">
-        <div className="rise" style={{ ["--i" as string]: 1 }}>
-          <p className="text-[18px] leading-relaxed text-ink/90 md:text-[19px]">{p.intro}</p>
-          {p.credit && <p className="mt-6 text-[16px] italic leading-relaxed text-soft">{p.credit}</p>}
+      <div className="mt-block grid gap-10 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] md:gap-16">
+        <div className="rise" style={{ ["--i" as string]: 3 }}>
+          <p className="max-w-[58ch] text-lead text-ink/90">{p.intro}</p>
+          {p.credit && <p className="mt-6 max-w-[58ch] text-body italic text-soft">{p.credit}</p>}
         </div>
-        <dl className="rise grid h-max grid-cols-[100px_1fr] items-start gap-x-5 gap-y-5 text-[15px]" style={{ ["--i" as string]: 2 }}>
+        <dl className="rise grid h-max grid-cols-[110px_1fr] items-start gap-x-6 gap-y-6 text-small" style={{ ["--i" as string]: 4 }}>
+          {p.client && (
+            <>
+              <Label>{pages.work.clientLabel}</Label>
+              <dd className="pt-1 text-ink/90">
+                {p.client.href ? (
+                  <a href={p.client.href} target="_blank" rel="noreferrer" className="u">
+                    {p.client.name} ↗
+                  </a>
+                ) : (
+                  p.client.name
+                )}
+              </dd>
+            </>
+          )}
           <Label>Team</Label>
           <dd>{p.teamMembers.length ? <Team people={p.teamMembers} /> : <span className="text-soft">{p.team}</span>}</dd>
           <Label>Services</Label>
           <dd className="flex flex-wrap gap-2">
             {p.services.map((s) => (
-              <span key={s} className="rounded-full border border-white/15 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.06em] text-ink/90">
+              <span key={s} className="rounded-full border border-white/15 px-3 py-1.5 font-mono text-label uppercase text-ink/90">
                 {s}
               </span>
             ))}
@@ -96,15 +114,15 @@ export default async function ProjectView({ slug }: { slug: string }) {
       </div>
 
       {p.sections.map((s, k) => (
-        <section key={k} className={s.heading || s.body ? "mt-24 md:mt-32" : "mt-14 md:mt-20"}>
+        <section key={k} className={s.heading || s.body ? "mt-section" : "mt-block"}>
           {(s.heading || s.body) && (
-            <div className="grid gap-4 md:grid-cols-[1fr_2.2fr] md:gap-16" data-inview>
-              <h2 className="text-[19px] md:text-[20px]">{s.heading}</h2>
-              <p className="text-[17px] leading-relaxed text-soft md:text-[18px]">{s.body}</p>
+            <div className="grid gap-4 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-16" data-inview>
+              <h2 className="text-h3 font-light">{s.heading}</h2>
+              <p className="max-w-[60ch] text-lead text-soft">{s.body}</p>
             </div>
           )}
           {s.gallery.length > 0 && (
-            <div className={`grid grid-cols-12 gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10 ${s.heading || s.body ? "mt-12 md:mt-16" : ""}`}>
+            <div className={`grid grid-cols-12 gap-x-4 gap-y-8 md:gap-x-5 md:gap-y-10 ${s.heading || s.body ? "mt-block" : ""}`}>
               {s.gallery.map((g, j) => (
                 <Tile key={j} g={g} id={`${p.slug}-${k}`} i={j} />
               ))}
@@ -113,10 +131,35 @@ export default async function ProjectView({ slug }: { slug: string }) {
         </section>
       ))}
 
+      {said.length > 0 && (
+        <section className="mt-section border-t border-rule pt-block" data-inview>
+          <Testimonials items={said} />
+        </section>
+      )}
+
+      {writing.length > 0 && (
+        <section className="mt-section" data-inview>
+          <p className="eyebrow">{pages.work.relatedNotesLabel}</p>
+          <ul className="mt-6">
+            {writing.map((n) => (
+              <li key={n.slug} className="border-t border-rule">
+                <Link href={n.href ?? `/notes/${n.slug}`} className="group flex items-baseline justify-between gap-6 py-6">
+                  <span className="text-h3 font-light transition-colors group-hover:text-soft">{n.title}</span>
+                  <span className="shrink-0 transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {next && next.slug !== p.slug && (
-        <Link href={`/work/${next.slug}`} className="group mt-32 flex items-center justify-between border-t border-rule pt-7 text-[16px]" data-inview>
-          <span className="text-soft">{pages.work.nextLabel}</span>
-          <span className="transition-transform duration-300 group-hover:translate-x-1">{next.title} →</span>
+        <Link href={`/work/${next.slug}`} className="group mt-section block border-t border-rule pt-8" data-inview>
+          <span className="eyebrow">{pages.work.nextLabel}</span>
+          <span className="mt-4 flex items-baseline justify-between gap-6">
+            <span className="text-h1 font-light transition-colors duration-300 group-hover:text-soft">{next.title}</span>
+            <span className="text-h2 transition-transform duration-500 ease-[var(--ease)] group-hover:translate-x-2">→</span>
+          </span>
         </Link>
       )}
     </article>

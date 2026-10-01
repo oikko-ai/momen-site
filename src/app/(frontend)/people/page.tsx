@@ -12,9 +12,9 @@ export default async function Page() {
   // Momen is a person in the CMS so he can appear on project teams, but not on his own People page.
   const items = all.filter((p) => p.name !== site.name);
   return (
-    <div className="mx-auto max-w-[1040px] px-5 md:px-7">
+    <div className="wrap">
       <PageHead title={pages.people.title} intro={pages.people.intro} />
-      <People people={items} tags={tagsOf(items)} />
+      <People people={items} tags={tagsOf(items)} projectsLabel={pages.people.projectsLabel} />
     </div>
   );
 }

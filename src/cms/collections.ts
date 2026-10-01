@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 import { coverOptions } from "./options";
 import { refreshHooks } from "./revalidate";
 import { Notes, Subscribers } from "./notes";
+import { Messages } from "./messages";
 
 const publicRead = { read: () => true };
 const orderField = { name: "order", type: "number", defaultValue: 0, admin: { position: "sidebar", description: "Lower numbers show first." } } as const;
@@ -72,6 +73,7 @@ export const Projects: CollectionConfig = {
                 { name: "team", type: "text", admin: { width: "60%" } },
           ],
         },
+        { name: "client", type: "relationship", relationTo: "clients", admin: { description: "Who the work was for. The project then shows on that client's row on the Clients page." } },
         { name: "featured", type: "checkbox", admin: { description: "Show in the big carousel on the home page." } },
         {
           name: "device",
@@ -91,6 +93,8 @@ export const Projects: CollectionConfig = {
             { name: "intro", type: "textarea", required: true },
             { name: "credit", type: "textarea", admin: { description: "Optional italic note under the intro, e.g. who led the work." } },
             { name: "teamMembers", type: "relationship", relationTo: "people", hasMany: true, admin: { description: "Each person is a persona from People: shown as an avatar with their name, role and link on hover." } },
+            { name: "testimonials", type: "join", collection: "testimonials", on: "project", admin: { description: "Quotes about this project, shown under the case study. Add them under People → Testimonials." } },
+            { name: "notes", type: "join", collection: "notes", on: "projects", label: "Related notes", admin: { description: "Notes that mention this project. Set them on the note." } },
             { name: "services", type: "array", labels: { singular: "Service", plural: "Services" }, fields: [{ name: "name", type: "text", required: true }] },
             {
               name: "sections",
@@ -135,7 +139,9 @@ export const Clients = simple("clients", "People", "name", [
   { name: "name", type: "text", required: true },
   { name: "note", type: "text", label: "Short description" },
   { name: "tags", type: "text", hasMany: true, admin: { description: "Filters on the Clients page are built from these." } },
-  { name: "href", type: "text", label: "Link" },
+  { name: "href", type: "text", label: "Website" },
+  { name: "logo", type: "upload", relationTo: "media", admin: { description: "Optional. A light logo on a transparent background, used in the client strip on Home." } },
+  { name: "projects", type: "join", collection: "projects", on: "client", admin: { description: "Set on each project's Card tab." } },
 ]);
 
 export const People = simple("people", "People", "name", [
@@ -146,6 +152,28 @@ export const People = simple("people", "People", "name", [
   { name: "href", type: "text", label: "Link", admin: { description: "LinkedIn or personal site. The avatar links here." } },
   { name: "avatar", type: "upload", relationTo: "media", admin: { description: "Square photo. Without one, a coloured monogram is drawn." } },
   { name: "demo", type: "checkbox", admin: { description: "Demo persona written as sample content. Replace or delete before launch." } },
+  { name: "projects", type: "join", collection: "projects", on: "teamMembers", admin: { description: "Projects this person is on. Set on each project's team." } },
+]);
+
+// Quotes from clients and collaborators, linked to the project and client they are about.
+export const Testimonials = simple("testimonials", "People", "name", [
+  { name: "quote", type: "textarea", required: true },
+  {
+    type: "row",
+    fields: [
+      { name: "name", type: "text", required: true, admin: { width: "50%" } },
+      { name: "role", type: "text", admin: { width: "50%", description: "e.g. Head of Product" } },
+    ],
+  },
+  {
+    type: "row",
+    fields: [
+      { name: "client", type: "relationship", relationTo: "clients", admin: { width: "50%" } },
+      { name: "project", type: "relationship", relationTo: "projects", admin: { width: "50%", description: "Shows the quote on this case study too." } },
+    ],
+  },
+  { name: "avatar", type: "upload", relationTo: "media", admin: { description: "Square photo. Without one, a coloured monogram is drawn." } },
+  { name: "demo", type: "checkbox", label: "Placeholder", admin: { description: "Marks a placeholder quote, shown with a Placeholder badge. Replace it with real words before launch." } },
 ]);
 
 export const Papers = simple("papers", "About", "title", [
@@ -169,4 +197,4 @@ export const Playground = simple("playground", "About", "title", [
   { name: "href", type: "text", label: "Link" },
 ]);
 
-export const collections = [Projects, Notes, Subscribers, Photos, Clients, People, Papers, Awards, Playground, Media, Users];
+export const collections = [Projects, Notes, Subscribers, Messages, Photos, Clients, People, Testimonials, Papers, Awards, Playground, Media, Users];

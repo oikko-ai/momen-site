@@ -226,7 +226,7 @@ export default function NoteReader({
           <button
             onMouseDown={(e) => e.preventDefault()}
             onClick={saveHighlight}
-            className="pop fixed z-50 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-full bg-ink px-3.5 py-1.5 text-[13px] text-paper shadow-xl"
+            className="pop fixed z-50 -translate-x-1/2 -translate-y-[calc(100%+10px)] rounded-full bg-ink px-3.5 py-1.5 text-micro text-paper shadow-xl"
             style={{ left: pick.x, top: pick.y }}
           >
             Highlight
@@ -235,7 +235,7 @@ export default function NoteReader({
         )}
       <div className="sticky bottom-6 z-30 mt-14 flex justify-center">
         <div className="relative">
-          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#1a1a1a]/90 p-1.5 text-[13px] text-soft shadow-2xl backdrop-blur-xl">
+          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-[#1a1a1a]/90 p-1.5 text-micro text-soft shadow-2xl backdrop-blur-xl">
             <button
               onClick={toggleLike}
               aria-pressed={liked}
@@ -285,7 +285,7 @@ export default function NoteReader({
           </div>
           {open && (
             <div className="pop absolute bottom-[calc(100%+10px)] left-1/2 w-[300px] -translate-x-1/2 overflow-hidden rounded-2xl border border-white/10 bg-[#1a1a1a]/95 shadow-2xl backdrop-blur-xl [transform-origin:bottom_center]">
-              <div className="flex items-center justify-between border-b border-white/5 px-4 py-3 text-[13px]">
+              <div className="flex items-center justify-between border-b border-white/5 px-4 py-3 text-micro">
                 <span className="text-ink">Highlights</span>
                 <span className="flex gap-1">
                   {(["mine", "them"] as const).map((t) => (
@@ -304,7 +304,7 @@ export default function NoteReader({
               </div>
               <ul className="max-h-[320px] overflow-y-auto p-1.5">
                 {list.length === 0 && (
-                  <li className="px-3 py-4 text-[13px] leading-relaxed text-soft">
+                  <li className="px-3 py-4 text-micro leading-relaxed text-soft">
                     {tab === "mine"
                       ? "Select any sentence in the note to highlight it."
                       : "No highlights yet."}
@@ -314,7 +314,7 @@ export default function NoteReader({
                   <li key={h.text}>
                     <button
                       onClick={() => jump(h.text)}
-                      className="w-full rounded-xl px-3 py-2.5 text-left text-[13px] leading-relaxed text-ink/85 transition-colors hover:bg-white/5"
+                      className="w-full rounded-xl px-3 py-2.5 text-left text-micro leading-relaxed text-ink/85 transition-colors hover:bg-white/5"
                     >
                       “{h.text}”
                       {tab === "them" && h.count > 1 && (

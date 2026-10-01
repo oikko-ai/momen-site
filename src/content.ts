@@ -7,6 +7,8 @@ export const me = {
   email: "abdulmomen.official@gmail.com",
   city: "Dhaka",
   tagline: "I build AI products that work outside the demo.",
+  available: true,
+  availableText: "Open to new projects",
   intro:
     "AI engineer and founder of Oikko AI. I help teams turn a promising model into a product people rely on every day.",
   socials: [
@@ -48,6 +50,7 @@ export type Project = {
   intro: string;
   sections: { heading?: string; body?: string; cover: Cover; gallery?: GalleryItem[] }[];
   people?: string[];
+  client?: string;
 };
 export type GalleryItem = {
   cover: Cover;
@@ -65,6 +68,7 @@ export type GalleryItem = {
 export const projects: Project[] = [
   {
     slug: "noteai",
+    client: "Genuine Technology & Research",
     code: "na",
     title: "NoteAI",
     subtitle: "Meetings that write their own follow-ups",
@@ -112,6 +116,7 @@ export const projects: Project[] = [
   },
   {
     slug: "clausis",
+    client: "Clausis",
     code: "cl",
     title: "Clausis",
     subtitle: "Legal drafting you can trace back to the source",
@@ -129,6 +134,7 @@ export const projects: Project[] = [
   },
   {
     slug: "chitra",
+    client: "Genuine Technology & Research",
     code: "ch",
     title: "Chitra",
     subtitle: "One front door for a family of products",
@@ -146,6 +152,7 @@ export const projects: Project[] = [
   },
   {
     slug: "oikko-marketplace",
+    client: "Oikko Marketplace",
     code: "om",
     title: "Oikko Marketplace",
     subtitle: "Helping local manufacturers find buyers",
@@ -210,6 +217,7 @@ export const projects: Project[] = [
   },
   {
     slug: "jogajog",
+    client: "Genuine Technology & Research",
     code: "jj",
     title: "Jogajog",
     subtitle: "A CRM that retired the sales spreadsheet",
@@ -345,7 +353,21 @@ export const aboutPage = {
 
 // Titles and short texts for the list pages. Editable in the CMS under "Other pages".
 export const pages = {
-  work: { title: "Work", intro: "", nextLabel: "Next project" },
+  home: {
+    aboutLink: "More about me",
+    approachTitle: "Approach",
+    workTitle: "Selected work",
+    seeAllLabel: "See all",
+    clientsTitle: "Teams I've built with",
+    testimonialsTitle: "Kind words",
+    stats: [
+      { count: "projects", label: "Projects" },
+      { count: "clients", label: "Clients and partners" },
+      { count: "people", label: "Collaborators" },
+      { count: "notes", label: "Notes written" },
+    ],
+  },
+  work: { title: "Work", intro: "", nextLabel: "Next project", clientLabel: "Client", relatedNotesLabel: "Writing about this" },
   notes: {
     title: "Notes",
     intro: "",
@@ -356,10 +378,11 @@ export const pages = {
     signedUpText: "Thanks, you're on the list.",
     allLabel: "All notes",
     nextLabel: "Next note",
+    relatedLabel: "Related work",
   },
   photos: { title: "Photos", intro: "" },
-  clients: { title: "Clients", intro: "" },
-  people: { title: "People", intro: "Good work is never solo. These are the people I build with, learn from and would happily work with again." },
+  clients: { title: "Clients", intro: "", visitLabel: "Visit" },
+  people: { title: "People", intro: "Good work is never solo. These are the people I build with, learn from and would happily work with again.", projectsLabel: "Worked on" },
   colophon: {
     title: "Colophon",
     intro: "Built by hand, with thanks to the open-source community.",
@@ -375,3 +398,27 @@ export const pages = {
     ],
   },
 };
+
+// PLACEHOLDER testimonials. They mark where real quotes go and are shown with a Placeholder badge.
+// Replace each one with words a real client or teammate agreed to share, then untick "Placeholder".
+export const testimonials: { quote: string; name: string; role: string; client?: string; project?: string }[] = [
+  {
+    quote: "Placeholder. A client's few sentences on what changed for their team after the work shipped, ideally with one concrete result.",
+    name: "Client name",
+    role: "Role, company",
+    client: "Oikko Marketplace",
+    project: "oikko-marketplace",
+  },
+  {
+    quote: "Placeholder. A product lead's words on what it was like to build with Momen, and why they would do it again.",
+    name: "Product lead",
+    role: "Role, company",
+    client: "Genuine Technology & Research",
+    project: "noteai",
+  },
+  {
+    quote: "Placeholder. A short line from a mentor, judge or collaborator who has seen Momen's work up close.",
+    name: "Mentor or collaborator",
+    role: "Role, organisation",
+  },
+];

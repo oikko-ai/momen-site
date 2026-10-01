@@ -5,8 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { moreNav, nav } from "@/content";
 import { useRoute } from "./useRoute";
+import Available from "./Available";
 
-export default function Header({ name }: { name: string }) {
+export default function Header({ name, available }: { name: string; available?: string }) {
   const pathname = useRoute(usePathname());
   const [open, setOpen] = useState(false);
   const [float, setFloat] = useState(false);
@@ -60,11 +61,18 @@ export default function Header({ name }: { name: string }) {
 
   return (
     <header className="relative z-40">
-      <div className="flex h-24 items-center justify-between px-5 md:px-7">
-        <Link href="/" className="text-[20px] tracking-tight text-soft md:text-[22px] transition-colors hover:text-ink">
-          {name}
-        </Link>
-        <div ref={box} className="relative flex items-center gap-5 text-[16px] md:gap-7 md:text-[18px]">
+      <div className="wrap flex h-18 items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="whitespace-nowrap text-lead tracking-tight text-ink transition-colors hover:text-soft">
+            {name}
+          </Link>
+          {available && (
+            <span className="hidden lg:block">
+              <Available text={available} />
+            </span>
+          )}
+        </div>
+        <div ref={box} className="relative flex items-center gap-5 text-body md:gap-8">
           {nav.map((n) => (
             <Link key={n.href} href={n.href} className={`${link(n.href)} ${n.href === "/" || n.href === "/notes" ? "hidden sm:inline" : ""}`}>
               {n.label}
@@ -80,7 +88,7 @@ export default function Header({ name }: { name: string }) {
                   key={n.href}
                   role="menuitem"
                   href={n.href}
-                  className={`flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-[16px] hover:bg-white/5 ${
+                  className={`flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-small hover:bg-white/5 ${
                     n.href === "/" || n.href === "/notes" ? "sm:hidden" : ""
                   } ${pathname.startsWith(n.href) && n.href !== "/" ? "text-ink" : "text-soft hover:text-ink"}`}
                 >
@@ -116,7 +124,7 @@ export default function Header({ name }: { name: string }) {
             {[...nav, ...moreNav].map((n) => {
               const on = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
               return (
-                <Link key={n.href} role="menuitem" href={n.href} className={`flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-[16px] hover:bg-white/5 ${on ? "text-ink" : "text-soft hover:text-ink"}`}>
+                <Link key={n.href} role="menuitem" href={n.href} className={`flex items-center gap-2 rounded-lg px-3.5 py-2.5 text-small hover:bg-white/5 ${on ? "text-ink" : "text-soft hover:text-ink"}`}>
                   <span className={`h-1 w-1 rounded-full ${on ? "bg-ink" : "bg-transparent"}`} />
                   {n.label}
                 </Link>

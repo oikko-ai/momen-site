@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getNotes, getProjects, getSite } from "@/lib/cms";
+import { getAwards, getClients, getNotes, getPages, getPapers, getPeople, getProjects, getSite, getTestimonials } from "@/lib/cms";
 import Rail from "@/components/Rail";
 import WorkStrip from "@/components/WorkStrip";
 import ContactForm from "@/components/ContactForm";
@@ -14,74 +14,129 @@ import PeoplePage from "./people/page";
 import ColophonPage from "./colophon/page";
 import ProjectView from "@/components/ProjectView";
 import Preview from "@/components/Preview";
+import Words from "@/components/Words";
+import Available from "@/components/Available";
+import Stats from "@/components/Stats";
+import ClientStrip from "@/components/ClientStrip";
+import Testimonials from "@/components/Testimonials";
 
 export async function HomeView() {
-  const [site, projects] = await Promise.all([getSite(), getProjects()]);
+  const [site, projects, pages, clients, people, notes, testimonials, papers, awards] = await Promise.all([
+    getSite(),
+    getProjects(),
+    getPages(),
+    getClients(),
+    getPeople(),
+    getNotes(),
+    getTestimonials(),
+    getPapers(),
+    getAwards(),
+  ]);
+  const h = pages.home;
   const featured = projects.filter((p) => p.featured);
+  const counts: Record<string, number> = {
+    projects: projects.length,
+    clients: clients.length,
+    people: people.filter((p) => p.name !== site.name).length,
+    notes: notes.length,
+    papers: papers.length,
+    awards: awards.length,
+  };
+  const stats = h.stats.filter((s) => counts[s.count]).map((s) => ({ value: counts[s.count], label: s.label }));
   return (
     <>
-      <section className="px-5 pb-14 pt-16 md:px-7 md:pb-20 md:pt-24">
-        <h1 className="rise max-w-[20ch] whitespace-pre-line text-[44px] font-light leading-[1.06] tracking-[-0.03em] md:text-[76px]">{site.tagline}</h1>
+      <section className="wrap pb-block pt-page">
+        <Words text={site.tagline} className="max-w-[17ch] whitespace-pre-line text-h1 font-light" />
+        <div className="rise mt-8 flex flex-col items-start gap-5 md:mt-10 md:flex-row md:items-center md:gap-8" style={{ ["--i" as string]: 4 }}>
+          {site.intro && <p className="max-w-[52ch] text-lead text-soft">{site.intro}</p>}
+          {site.available && site.availableText && (
+            <span className="shrink-0 lg:hidden">
+              <Available text={site.availableText} />
+            </span>
+          )}
+        </div>
       </section>
 
       <Rail items={featured} />
 
-      <div className="mx-auto max-w-[1200px] px-5 md:px-7">
-        <section className="mt-32 grid items-start gap-10 md:grid-cols-[minmax(0,480px)_1fr] md:gap-16" data-inview>
-          <Portrait src={site.portrait?.url} className="aspect-[4/5] w-full" />
-          <div>
-            <h2 className="whitespace-pre-line text-[34px] font-light leading-[1.12] tracking-[-0.02em] md:text-[46px]">{site.aboutHeading}</h2>
-            <div className="mt-7 space-y-5 text-[18px] leading-relaxed text-soft md:text-[21px]">
-              {site.aboutBody.map((p, i) => (
-                <p key={i}>{p}</p>
-              ))}
-            </div>
-            <Link href="/about" className="mt-7 inline-block text-[16px] text-soft transition-colors hover:text-ink">
-              Read more →
-            </Link>
-          </div>
+      {stats.length > 0 && (
+        <section className="wrap mt-section">
+          <Stats items={stats} />
         </section>
+      )}
 
-        {site.approach.length > 0 && (
-          <section className="mt-32">
-            <h2 className="text-[34px] font-light tracking-[-0.02em] md:text-[52px]" data-inview>
-              Approach
-            </h2>
-            <ol className="mt-8">
-              {site.approach.map((a, i) => (
-                <li
-                  key={a.title}
-                  className="grid gap-2 border-t border-rule py-8 md:grid-cols-[40px_320px_1fr] md:gap-6"
-                  data-inview
-                  style={{ transitionDelay: `${i * 60}ms` }}
-                >
-                  <span className="text-[16px] text-faint">{i + 1}</span>
-                  <h3 className="text-[22px] font-light md:text-[26px]">{a.title}</h3>
-                  <p className="text-[18px] leading-relaxed text-soft md:text-[20px]">{a.body}</p>
-                </li>
-              ))}
-            </ol>
-          </section>
-        )}
-      </div>
-
-      <section className="mt-32">
-        <div className="mx-auto flex max-w-[1200px] items-baseline justify-between px-5 md:px-7" data-inview>
-          <h2 className="text-[34px] font-light tracking-[-0.02em] md:text-[52px]">Work</h2>
-          <Link href="/work" className="text-[16px] text-soft hover:text-ink">
-            See all →
+      <section className="wrap mt-section grid items-start gap-block md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]" data-inview>
+        <Portrait src={site.portrait?.url} name={site.name} className="aspect-[4/5] w-full" />
+        <div className="md:pt-4">
+          <h2 className="whitespace-pre-line text-h2 font-light">{site.aboutHeading}</h2>
+          <div className="mt-8 max-w-[60ch] space-y-5 text-lead text-soft">
+            {site.aboutBody.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
+          <Link href="/about" className="group mt-8 inline-flex items-center gap-2 text-body">
+            <span className="u">{h.aboutLink}</span>
+            <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
           </Link>
         </div>
-        <div className="mt-8" data-inview>
+      </section>
+
+      {site.approach.length > 0 && (
+        <section className="wrap mt-section">
+          <h2 className="text-h2 font-light" data-inview>
+            {h.approachTitle}
+          </h2>
+          <ol className="mt-block">
+            {site.approach.map((a, i) => (
+              <li
+                key={a.title}
+                className="grid gap-3 border-t border-rule py-8 md:grid-cols-[minmax(0,1fr)_minmax(0,4fr)_minmax(0,6fr)] md:gap-8 md:py-10"
+                data-inview
+                style={{ transitionDelay: `${i * 70}ms` }}
+              >
+                <span className="font-mono text-label text-faint">{String(i + 1).padStart(2, "0")}</span>
+                <h3 className="text-h3 font-light">{a.title}</h3>
+                <p className="max-w-[52ch] text-lead text-soft">{a.body}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
+      <section className="mt-section">
+        <div className="wrap flex items-baseline justify-between" data-inview>
+          <h2 className="text-h2 font-light">{h.workTitle}</h2>
+          <Link href="/work" className="group inline-flex items-center gap-2 text-body text-soft transition-colors hover:text-ink">
+            {h.seeAllLabel} <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </Link>
+        </div>
+        <div className="mt-block" data-inview>
           <WorkStrip items={projects} />
         </div>
       </section>
 
-      <section id="contact" className="mx-auto mt-40 max-w-[760px] px-5 text-center">
-        <h2 className="whitespace-pre-line text-[40px] font-light leading-[1.08] tracking-[-0.03em] md:text-[64px]" data-inview>
+      {clients.length > 0 && (
+        <section className="mt-section">
+          <p className="wrap eyebrow" data-inview>
+            {h.clientsTitle}
+          </p>
+          <div className="mt-8" data-inview>
+            <ClientStrip clients={clients} />
+          </div>
+        </section>
+      )}
+
+      {testimonials.length > 0 && (
+        <section className="wrap mt-section" data-inview>
+          <Testimonials items={testimonials} title={h.testimonialsTitle} />
+        </section>
+      )}
+
+      <section id="contact" className="wrap mt-section">
+        <h2 className="whitespace-pre-line text-center text-h1 font-light" data-inview>
           {site.contactHeading}
         </h2>
-        <div className="mt-10 text-left" data-inview>
+        <div className="mx-auto mt-block max-w-[800px]" data-inview>
           <ContactForm to={site.email} />
         </div>
       </section>

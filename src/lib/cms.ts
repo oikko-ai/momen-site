@@ -14,13 +14,18 @@ export const media = (m: MediaDoc): Media =>
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
-const all = cache(async (collection: "projects" | "notes" | "photos" | "clients" | "people" | "papers" | "awards" | "playground") => {
+type Listed = "projects" | "notes" | "photos" | "clients" | "people" | "papers" | "awards" | "playground" | "testimonials";
+// Reverse lookups (a client's projects, a person's projects) are worked out here from the forward links, so joins are skipped.
+const all = cache(async (collection: Listed) => {
   const p = await payload();
-  const { docs } = await p.find({ collection, limit: 500, sort: collection === "notes" ? "-date" : "order", depth: 2 });
+  const { docs } = await p.find({ collection, limit: 500, sort: collection === "notes" ? "-date" : "order", depth: 2, joins: false as never });
   return docs as unknown as Record<string, unknown>[];
 });
 
+const idStr = (v: unknown) => (v && typeof v === "object" ? String((v as { id: unknown }).id) : v == null ? "" : String(v));
+
 export type Project = {
+  id: string;
   slug: string;
   code: string;
   title: string;
@@ -30,6 +35,7 @@ export type Project = {
   services: string[];
   team: string;
   teamMembers: Person[];
+  client: { id: string; name: string; href?: string } | null;
   credit: string;
   device: Device;
   cover: Cover;
@@ -38,7 +44,7 @@ export type Project = {
   sections: { heading: string; body: string; gallery: GalleryImage[] }[];
 };
 export type Device = "phone" | "tablet" | "laptop" | "none";
-export type Person = { name: string; role: string; bio: string; href?: string; avatar: Media; demo: boolean };
+export type Person = { id: string; name: string; role: string; bio: string; href?: string; avatar: Media; demo: boolean };
 export type GalleryImage = {
   media: Media;
   embed?: string;
@@ -53,6 +59,7 @@ export type GalleryImage = {
 };
 
 const person = (m: Record<string, unknown>): Person => ({
+  id: idStr(m),
   name: str(m.name),
   role: str(m.role),
   bio: str(m.bio),
@@ -80,6 +87,8 @@ export const getSite = cache(async () => {
     portrait: media(s.portrait),
     socials: ((s.socials as { label: string; href: string }[]) ?? []).map(({ label, href }) => ({ label, href })),
     tagline: (s.tagline as string) ?? "",
+    available: !!s.available,
+    availableText: (s.availableText as string) ?? "",
     intro: (s.intro as string) ?? "",
     aboutHeading: (s.aboutHeading as string) ?? "",
     aboutBody: ((s.aboutBody as { text: string }[]) ?? []).map((p) => p.text),
@@ -96,6 +105,7 @@ export const getAbout = cache(async () => {
 
 export const getProjects = cache(async (): Promise<Project[]> =>
   (await all("projects")).map((d) => ({
+    id: idStr(d),
     slug: d.slug as string,
     code: (d.code as string) ?? "",
     title: d.title as string,
@@ -105,6 +115,7 @@ export const getProjects = cache(async (): Promise<Project[]> =>
     services: ((d.services as { name: string }[]) ?? []).map((s) => s.name),
     team: (d.team as string) ?? "",
     teamMembers: ((d.teamMembers as Record<string, unknown>[]) ?? []).filter((m) => m && typeof m === "object").map(person),
+    client: d.client && typeof d.client === "object" ? { id: idStr(d.client), name: str((d.client as Record<string, unknown>).name), href: str((d.client as Record<string, unknown>).href) || undefined } : null,
     credit: (d.credit as string) ?? "",
     device: ((d.device as Device) ?? "phone") as Device,
     cover: ((d.cover as Cover) ?? "graph") as Cover,
@@ -147,6 +158,7 @@ export type Note = {
   highlights: { text: string; count: number }[];
   likes: number;
   views: number;
+  projects: string[];
 };
 const num = (v: unknown) => (typeof v === "number" ? v : 0);
 // Newest first. A note's year comes from its date.
@@ -164,13 +176,49 @@ export const getNotes = cache(async (): Promise<Note[]> =>
     highlights: ((d.highlights as { text: string; count?: number }[]) ?? []).map((h) => ({ text: h.text, count: h.count ?? 1 })),
     likes: num(d.likes),
     views: num(d.views),
+    projects: ((d.projects as unknown[]) ?? []).map(idStr).filter(Boolean),
   })).sort((a, b) => b.date.localeCompare(a.date)),
 );
 export const getPhotos = cache(async () => pick(await all("photos"), (d) => ({ image: media(d.image as MediaDoc), caption: str(d.caption) })));
-export const getClients = cache(async () =>
-  pick(await all("clients"), (d) => ({ name: str(d.name), note: str(d.note), tags: (d.tags as string[]) ?? [], href: str(d.href) || undefined })),
-);
-export const getPeople = cache(async () => pick(await all("people"), (d) => ({ ...person(d), tags: (d.tags as string[]) ?? [] })));
+type Ref = { slug: string; title: string };
+const ref = (p: Project): Ref => ({ slug: p.slug, title: p.title });
+export const getClients = cache(async () => {
+  const projects = await getProjects();
+  return pick(await all("clients"), (d) => ({
+    id: idStr(d),
+    name: str(d.name),
+    note: str(d.note),
+    tags: (d.tags as string[]) ?? [],
+    href: str(d.href) || undefined,
+    logo: media(d.logo as MediaDoc),
+    projects: projects.filter((p) => p.client?.id === idStr(d)).map(ref),
+  }));
+});
+export type Client = Awaited<ReturnType<typeof getClients>>[number];
+export const getPeople = cache(async () => {
+  const projects = await getProjects();
+  return pick(await all("people"), (d) => ({
+    ...person(d),
+    tags: (d.tags as string[]) ?? [],
+    projects: projects.filter((p) => p.teamMembers.some((m) => m.id === idStr(d))).map(ref),
+  }));
+});
+export type Testimonial = { quote: string; name: string; role: string; avatar: Media; demo: boolean; client: string; project?: Ref };
+export const getTestimonials = cache(async (): Promise<Testimonial[]> => {
+  const projects = await getProjects();
+  return pick(await all("testimonials"), (d) => {
+    const project = projects.find((p) => p.id === idStr(d.project));
+    return {
+      quote: str(d.quote),
+      name: str(d.name),
+      role: str(d.role),
+      avatar: media(d.avatar as MediaDoc),
+      demo: !!d.demo,
+      client: d.client && typeof d.client === "object" ? str((d.client as Record<string, unknown>).name) : "",
+      project: project && ref(project),
+    };
+  });
+});
 export const getPapers = cache(async () =>
   pick(await all("papers"), (d) => ({ title: str(d.title), venue: str(d.venue), year: str(d.year), status: str(d.status), href: str(d.href) || undefined, image: media(d.image as MediaDoc) })),
 );
@@ -185,6 +233,7 @@ export const getPages = cache(async () => {
     return Object.fromEntries(Object.entries(start).map(([k, d]) => [k, Array.isArray(d) ? ((v[k] as unknown[])?.length ? v[k] : d) : str(v[k]) || (k === "intro" ? "" : d)])) as T;
   };
   return {
+    home: merge("home", startPages.home),
     work: merge("work", startPages.work),
     notes: merge("notes", startPages.notes),
     photos: merge("photos", startPages.photos),

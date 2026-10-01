@@ -10,6 +10,7 @@ export type StartNote = {
   likes: number;
   views: number;
   highlights: { text: string; count: number }[];
+  projects?: string[];
   body: string[];
 };
 
@@ -41,6 +42,7 @@ export const startNotes: StartNote[] = [
   {
     title: "Teaching a model to hear Bengali",
     slug: "teaching-a-model-to-hear-bengali",
+    projects: ["noteai"],
     date: "2026-07-02",
     summary: "What speech recognition taught me about data, accents and humility.",
     likes: 41,
@@ -62,6 +64,7 @@ export const startNotes: StartNote[] = [
   {
     title: "Why we built Oikko AI together",
     slug: "why-we-built-oikko-ai-together",
+    projects: ["oikko-marketplace"],
     date: "2026-05-11",
     summary: "On starting a company with friends, and building for businesses that usually get software last.",
     likes: 87,
@@ -84,6 +87,7 @@ export const startNotes: StartNote[] = [
   {
     title: "Sources or it didn't happen",
     slug: "sources-or-it-didnt-happen",
+    projects: ["clausis"],
     date: "2026-02-20",
     summary: "Building AI drafting that legal teams can check in one click.",
     likes: 38,
@@ -99,6 +103,7 @@ export const startNotes: StartNote[] = [
   {
     title: "The boring parts are the product",
     slug: "the-boring-parts-are-the-product",
+    projects: ["private-inference"],
     date: "2025-11-04",
     summary: "Logging, cost and latency decide whether an AI feature survives.",
     likes: 29,

@@ -5,6 +5,7 @@ export const refreshSite = () => {
   try {
     revalidatePath("/", "layout");
     revalidatePath("/notes/rss.xml");
+    revalidatePath("/sitemap.xml");
   } catch {
     // Outside a Next.js request (seeding, CLI scripts): nothing to refresh.
   }

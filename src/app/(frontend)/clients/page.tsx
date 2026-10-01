@@ -10,9 +10,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page() {
   const [items, pages] = await Promise.all([getClients(), getPages()]);
   return (
-    <div className="mx-auto max-w-[1040px] px-5 md:px-7">
+    <div className="wrap">
       <PageHead title={pages.clients.title} intro={pages.clients.intro} />
-      <Clients clients={items} tags={tagsOf(items)} />
+      <Clients clients={items} tags={tagsOf(items)} visitLabel={pages.clients.visitLabel} />
     </div>
   );
 }

@@ -37,7 +37,7 @@ export default function Like({ id, count }: { id: string; count: number }) {
       onClick={toggle}
       aria-pressed={liked}
       aria-label={liked ? "Unlike" : "Like"}
-      className={`absolute bottom-3 left-3 z-10 flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-[12px] text-white backdrop-blur-md transition-opacity duration-300 focus-visible:opacity-100 group-hover/m:opacity-100 ${
+      className={`absolute bottom-3 left-3 z-10 flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-micro text-white backdrop-blur-md transition-opacity duration-300 focus-visible:opacity-100 group-hover/m:opacity-100 ${
         liked ? "opacity-100" : "opacity-0"
       }`}
     >

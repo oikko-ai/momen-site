@@ -70,9 +70,11 @@ export interface Config {
     projects: Project;
     notes: Note;
     subscribers: Subscriber;
+    messages: Message;
     photos: Photo;
     clients: Client;
     people: Person;
+    testimonials: Testimonial;
     papers: Paper;
     awards: Award;
     playground: Playground;
@@ -83,14 +85,27 @@ export interface Config {
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {};
+  collectionsJoins: {
+    projects: {
+      testimonials: 'testimonials';
+      notes: 'notes';
+    };
+    clients: {
+      projects: 'projects';
+    };
+    people: {
+      projects: 'projects';
+    };
+  };
   collectionsSelect: {
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
     notes: NotesSelect<false> | NotesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
+    messages: MessagesSelect<false> | MessagesSelect<true>;
     photos: PhotosSelect<false> | PhotosSelect<true>;
     clients: ClientsSelect<false> | ClientsSelect<true>;
     people: PeopleSelect<false> | PeopleSelect<true>;
+    testimonials: TestimonialsSelect<false> | TestimonialsSelect<true>;
     papers: PapersSelect<false> | PapersSelect<true>;
     awards: AwardsSelect<false> | AwardsSelect<true>;
     playground: PlaygroundSelect<false> | PlaygroundSelect<true>;
@@ -162,6 +177,10 @@ export interface Project {
   year?: string | null;
   team?: string | null;
   /**
+   * Who the work was for. The project then shows on that client's row on the Clients page.
+   */
+  client?: (number | null) | Client;
+  /**
    * Show in the big carousel on the home page.
    */
   featured?: boolean | null;
@@ -186,6 +205,22 @@ export interface Project {
    * Each person is a persona from People: shown as an avatar with their name, role and link on hover.
    */
   teamMembers?: (number | Person)[] | null;
+  /**
+   * Quotes about this project, shown under the case study. Add them under People → Testimonials.
+   */
+  testimonials?: {
+    docs?: (number | Testimonial)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Notes that mention this project. Set them on the note.
+   */
+  notes?: {
+    docs?: (number | Note)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
   services?:
     | {
         name: string;
@@ -251,6 +286,38 @@ export interface Project {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "clients".
+ */
+export interface Client {
+  id: number;
+  name: string;
+  note?: string | null;
+  /**
+   * Filters on the Clients page are built from these.
+   */
+  tags?: string[] | null;
+  href?: string | null;
+  /**
+   * Optional. A light logo on a transparent background, used in the client strip on Home.
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Set on each project's Card tab.
+   */
+  projects?: {
+    docs?: (number | Project)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Lower numbers show first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -297,6 +364,46 @@ export interface Person {
    */
   demo?: boolean | null;
   /**
+   * Projects this person is on. Set on each project's team.
+   */
+  projects?: {
+    docs?: (number | Project)[];
+    hasNextPage?: boolean;
+    totalDocs?: number;
+  };
+  /**
+   * Lower numbers show first.
+   */
+  order?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials".
+ */
+export interface Testimonial {
+  id: number;
+  quote: string;
+  name: string;
+  /**
+   * e.g. Head of Product
+   */
+  role?: string | null;
+  client?: (number | null) | Client;
+  /**
+   * Shows the quote on this case study too.
+   */
+  project?: (number | null) | Project;
+  /**
+   * Square photo. Without one, a coloured monogram is drawn.
+   */
+  avatar?: (number | null) | Media;
+  /**
+   * Marks a placeholder quote, shown with a Placeholder badge. Replace it with real words before launch.
+   */
+  demo?: boolean | null;
+  /**
    * Lower numbers show first.
    */
   order?: number | null;
@@ -327,6 +434,10 @@ export interface Note {
    * Optional image shown under the title.
    */
   cover?: (number | null) | Media;
+  /**
+   * Projects this note is about, shown as cards at the end of the note.
+   */
+  projects?: (number | Project)[] | null;
   /**
    * Headings, quotes, lists, links, images and videos. Use the + menu or type / to add blocks.
    */
@@ -379,32 +490,29 @@ export interface Subscriber {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages".
+ */
+export interface Message {
+  id: number;
+  name?: string | null;
+  email: string;
+  subject?: string | null;
+  message: string;
+  /**
+   * Tick once you've replied.
+   */
+  read?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "photos".
  */
 export interface Photo {
   id: number;
   image: number | Media;
   caption?: string | null;
-  /**
-   * Lower numbers show first.
-   */
-  order?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "clients".
- */
-export interface Client {
-  id: number;
-  name: string;
-  note?: string | null;
-  /**
-   * Filters on the Clients page are built from these.
-   */
-  tags?: string[] | null;
-  href?: string | null;
   /**
    * Lower numbers show first.
    */
@@ -526,6 +634,10 @@ export interface PayloadLockedDocument {
         value: number | Subscriber;
       } | null)
     | ({
+        relationTo: 'messages';
+        value: number | Message;
+      } | null)
+    | ({
         relationTo: 'photos';
         value: number | Photo;
       } | null)
@@ -536,6 +648,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'people';
         value: number | Person;
+      } | null)
+    | ({
+        relationTo: 'testimonials';
+        value: number | Testimonial;
       } | null)
     | ({
         relationTo: 'papers';
@@ -610,6 +726,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   code?: T;
   year?: T;
   team?: T;
+  client?: T;
   featured?: T;
   device?: T;
   image?: T;
@@ -617,6 +734,8 @@ export interface ProjectsSelect<T extends boolean = true> {
   intro?: T;
   credit?: T;
   teamMembers?: T;
+  testimonials?: T;
+  notes?: T;
   services?:
     | T
     | {
@@ -661,6 +780,7 @@ export interface NotesSelect<T extends boolean = true> {
   summary?: T;
   href?: T;
   cover?: T;
+  projects?: T;
   body?: T;
   highlights?:
     | T
@@ -686,6 +806,19 @@ export interface SubscribersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "messages_select".
+ */
+export interface MessagesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  subject?: T;
+  message?: T;
+  read?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "photos_select".
  */
 export interface PhotosSelect<T extends boolean = true> {
@@ -704,6 +837,8 @@ export interface ClientsSelect<T extends boolean = true> {
   note?: T;
   tags?: T;
   href?: T;
+  logo?: T;
+  projects?: T;
   order?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -718,6 +853,23 @@ export interface PeopleSelect<T extends boolean = true> {
   bio?: T;
   tags?: T;
   href?: T;
+  avatar?: T;
+  demo?: T;
+  projects?: T;
+  order?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonials_select".
+ */
+export interface TestimonialsSelect<T extends boolean = true> {
+  quote?: T;
+  name?: T;
+  role?: T;
+  client?: T;
+  project?: T;
   avatar?: T;
   demo?: T;
   order?: T;
@@ -865,6 +1017,11 @@ export interface Site {
       }[]
     | null;
   /**
+   * A small green dot with the text beside it, in the header and on Home.
+   */
+  available?: boolean | null;
+  availableText?: string | null;
+  /**
    * The big headline at the top.
    */
   tagline: string;
@@ -916,10 +1073,30 @@ export interface About {
 export interface Page {
   id: number;
   contentVersion?: number | null;
+  home?: {
+    aboutLink?: string | null;
+    approachTitle?: string | null;
+    workTitle?: string | null;
+    seeAllLabel?: string | null;
+    clientsTitle?: string | null;
+    testimonialsTitle?: string | null;
+    /**
+     * Numbers counted live from the CMS. Pick what to count and how to label it.
+     */
+    stats?:
+      | {
+          count: 'projects' | 'clients' | 'people' | 'notes' | 'papers' | 'awards';
+          label: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
   work: {
     title: string;
     intro?: string | null;
     nextLabel?: string | null;
+    clientLabel?: string | null;
+    relatedNotesLabel?: string | null;
   };
   notes: {
     title: string;
@@ -937,6 +1114,7 @@ export interface Page {
     signedUpText?: string | null;
     allLabel?: string | null;
     nextLabel?: string | null;
+    relatedLabel?: string | null;
   };
   photos: {
     title: string;
@@ -945,10 +1123,12 @@ export interface Page {
   clients: {
     title: string;
     intro?: string | null;
+    visitLabel?: string | null;
   };
   people: {
     title: string;
     intro?: string | null;
+    projectsLabel?: string | null;
   };
   colophon: {
     title: string;
@@ -980,6 +1160,8 @@ export interface SiteSelect<T extends boolean = true> {
         href?: T;
         id?: T;
       };
+  available?: T;
+  availableText?: T;
   tagline?: T;
   intro?: T;
   aboutHeading?: T;
@@ -1023,12 +1205,31 @@ export interface AboutSelect<T extends boolean = true> {
  */
 export interface PagesSelect<T extends boolean = true> {
   contentVersion?: T;
+  home?:
+    | T
+    | {
+        aboutLink?: T;
+        approachTitle?: T;
+        workTitle?: T;
+        seeAllLabel?: T;
+        clientsTitle?: T;
+        testimonialsTitle?: T;
+        stats?:
+          | T
+          | {
+              count?: T;
+              label?: T;
+              id?: T;
+            };
+      };
   work?:
     | T
     | {
         title?: T;
         intro?: T;
         nextLabel?: T;
+        clientLabel?: T;
+        relatedNotesLabel?: T;
       };
   notes?:
     | T
@@ -1042,6 +1243,7 @@ export interface PagesSelect<T extends boolean = true> {
         signedUpText?: T;
         allLabel?: T;
         nextLabel?: T;
+        relatedLabel?: T;
       };
   photos?:
     | T
@@ -1054,12 +1256,14 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         title?: T;
         intro?: T;
+        visitLabel?: T;
       };
   people?:
     | T
     | {
         title?: T;
         intro?: T;
+        projectsLabel?: T;
       };
   colophon?:
     | T

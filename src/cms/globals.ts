@@ -27,6 +27,13 @@ export const Site: GlobalConfig = {
             { name: "city", type: "text" },
             { name: "portrait", type: "upload", relationTo: "media", admin: { description: "Shown on Home and About." } },
             { name: "socials", type: "array", fields: [{ name: "label", type: "text", required: true }, { name: "href", type: "text", required: true }] },
+            {
+              type: "row",
+              fields: [
+                { name: "available", type: "checkbox", label: "Show availability badge", admin: { width: "40%", description: "A small green dot with the text beside it, in the header and on Home." } },
+                { name: "availableText", type: "text", label: "Availability text", admin: { width: "60%" } },
+              ],
+            },
           ],
         },
         {
@@ -74,7 +81,40 @@ export const Pages: GlobalConfig = {
     {
       type: "tabs",
       tabs: [
-        { label: "Work", fields: [pageText("work", "Work page", [{ name: "nextLabel", type: "text", defaultValue: "Next project" }])] },
+        {
+          label: "Home",
+          description: "Section titles and labels on the home page. The headline and texts are under Site & Home.",
+          fields: [
+            {
+              name: "home",
+              type: "group",
+              fields: [
+                { type: "row", fields: [{ name: "aboutLink", type: "text", admin: { width: "50%" } }, { name: "approachTitle", type: "text", admin: { width: "50%" } }] },
+                { type: "row", fields: [{ name: "workTitle", type: "text", admin: { width: "50%" } }, { name: "seeAllLabel", type: "text", admin: { width: "50%" } }] },
+                { type: "row", fields: [{ name: "clientsTitle", type: "text", admin: { width: "50%" } }, { name: "testimonialsTitle", type: "text", admin: { width: "50%" } }] },
+                {
+                  name: "stats",
+                  type: "array",
+                  admin: { description: "Numbers counted live from the CMS. Pick what to count and how to label it." },
+                  fields: [
+                    {
+                      type: "row",
+                      fields: [
+                        { name: "count", type: "select", required: true, options: ["projects", "clients", "people", "notes", "papers", "awards"], admin: { width: "40%" } },
+                        { name: "label", type: "text", required: true, admin: { width: "60%" } },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        { label: "Work", fields: [pageText("work", "Work page", [
+              { name: "nextLabel", type: "text", defaultValue: "Next project" },
+              { name: "clientLabel", type: "text", defaultValue: "Client" },
+              { name: "relatedNotesLabel", type: "text", defaultValue: "Writing about this" },
+            ])] },
         {
           label: "Notes",
           fields: [
@@ -86,12 +126,13 @@ export const Pages: GlobalConfig = {
               { name: "signedUpText", type: "text", defaultValue: "Thanks, you're on the list." },
               { name: "allLabel", type: "text", defaultValue: "All notes" },
               { name: "nextLabel", type: "text", defaultValue: "Next note" },
+              { name: "relatedLabel", type: "text", defaultValue: "Related work" },
             ]),
           ],
         },
         { label: "Photos", fields: [pageText("photos", "Photos page")] },
-        { label: "Clients", fields: [pageText("clients", "Clients page")] },
-        { label: "People", fields: [pageText("people", "People page")] },
+        { label: "Clients", fields: [pageText("clients", "Clients page", [{ name: "visitLabel", type: "text", defaultValue: "Visit" }])] },
+        { label: "People", fields: [pageText("people", "People page", [{ name: "projectsLabel", type: "text", defaultValue: "Worked on" }])] },
         {
           label: "Colophon",
           fields: [

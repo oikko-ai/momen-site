@@ -1,16 +1,16 @@
-// PLACEHOLDER portrait until Momen sends a photo. Put it at /public/momen.jpg and pass src.
-export default function Portrait({ src, className = "" }: { src?: string; className?: string }) {
+import Avatar from "./Avatar";
+
+// The portrait on Home and About. Until a photo is uploaded in Site & Home, a placeholder with initials shows.
+export default function Portrait({ src, name, className = "" }: { src?: string; name: string; className?: string }) {
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-[radial-gradient(120%_100%_at_30%_20%,#2a2a2a,#111)] ${className}`}>
+    <div className={`relative overflow-hidden rounded-3xl bg-card ${className}`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="Abdul Momen" className="h-full w-full object-cover" />
+        <img src={src} alt={name} className="h-full w-full object-cover" />
       ) : (
-        <div className="absolute inset-0 grid place-items-center">
-          <div className="text-center">
-            <span className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-white/10 text-[28px] text-ink">AM</span>
-            <p className="mt-4 text-[14px] text-soft">Portrait coming soon</p>
-          </div>
+        <div className="absolute inset-0 grid place-items-center bg-[radial-gradient(120%_90%_at_30%_10%,#232323,#0d0d0d)]">
+          <Avatar name={name} image={null} className="h-[34%] w-auto aspect-square" />
+          <span className="eyebrow absolute bottom-6 left-6">Portrait placeholder</span>
         </div>
       )}
     </div>

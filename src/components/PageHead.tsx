@@ -1,12 +1,16 @@
-export default function PageHead({ title, intro }: { title: string; intro?: string }) {
+import Words from "./Words";
+
+// Every page opens the same way: the title at the same height and size, then an optional intro.
+export default function PageHead({ title, intro, children }: { title: string; intro?: string; children?: React.ReactNode }) {
   return (
-    <header className="pb-10 pt-14 md:pb-14 md:pt-20">
-      <h1 className="rise text-[44px] font-light leading-[1.05] tracking-[-0.03em] md:text-[72px]">{title}</h1>
+    <header className="pb-block pt-page">
+      <Words text={title} className="text-h1 font-light" />
       {intro && (
-        <p className="rise mt-6 max-w-[42ch] text-[17px] leading-relaxed text-soft" style={{ ["--i" as string]: 1 }}>
+        <p className="rise mt-6 max-w-[48ch] text-lead text-soft" style={{ ["--i" as string]: 2 }}>
           {intro}
         </p>
       )}
+      {children}
     </header>
   );
 }

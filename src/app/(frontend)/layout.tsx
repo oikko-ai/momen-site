@@ -19,7 +19,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${GeistMono.variable} antialiased`}>
       <body className="flex min-h-screen flex-col">
-        <Header name={site.name} />
+        <Header name={site.name} available={site.available ? site.availableText : undefined} />
         <Reveal />
         <main className="flex-1">{children}</main>
         <Footer site={site} />
